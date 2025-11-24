@@ -22,7 +22,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const [themeMode, setThemeMode] = useState<ThemeMode>('dark');
     const [themeStyle, setThemeStyle] = useState<ThemeStyle>('retro');
     const [profileImage, setProfileImage] = useState<string | null>(null);
-    const [agencyName, setAgencyName] = useState<string>('AgencyFlow');
+    const [agencyName, setAgencyName] = useState<string>('StartinOS');
 
     useEffect(() => {
         const storedMode = localStorage.getItem('themeMode') as ThemeMode;

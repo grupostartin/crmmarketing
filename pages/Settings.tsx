@@ -83,7 +83,7 @@ const Settings = () => {
         <div className="space-y-8 max-w-4xl mx-auto">
             <div>
                 <h1 className="font-header text-3xl text-retro-fg">Configurações</h1>
-                <p className="text-retro-comment text-lg">Personalize sua experiência no AgencyFlow.</p>
+                <p className="text-retro-comment text-lg">Personalize sua experiência no StartinOS.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

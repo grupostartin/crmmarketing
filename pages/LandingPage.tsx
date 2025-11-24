@@ -319,7 +319,7 @@ const Navbar = () => {
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-primary border-2 border-black shadow-pixel-sm"></div>
           <div className="flex flex-col">
-            <span className="font-display text-lg text-white">AgencyFlow</span>
+            <span className="font-display text-lg text-white">StartinOS</span>
             <span className="font-body text-gray-400 text-sm leading-none">Marketing CRM</span>
           </div>
         </div>
@@ -603,7 +603,7 @@ const HowItWorks = () => {
               
               <div className="space-y-12">
                 {[
-                  { number: "01", title: "Captura & Qualificação", text: "O lead responde ao seu Quiz personalizado. O AgencyFlow calcula o score e define se é um lead quente." },
+                  { number: "01", title: "Captura & Qualificação", text: "O lead responde ao seu Quiz personalizado. O StartinOS calcula o score e define se é um lead quente." },
                   { number: "02", title: "Negociação no Pipeline", text: "Leads qualificados caem direto na coluna 'Novo' do seu Kanban. Seu time recebe um alerta." },
                   { number: "03", title: "Fechamento & Onboarding", text: "Ganhou o deal? Converta em contrato com um clique e inicie o processo de onboarding do cliente." }
                 ].map((step, index) => (
@@ -751,7 +751,7 @@ const Footer = () => {
         
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-gray-800 border-2 border-gray-600 hover:bg-gray-700 transition-colors"></div>
-          <span className="font-display text-gray-400">AgencyFlow &copy; 2025</span>
+          <span className="font-display text-gray-400">StartinOS &copy; 2025</span>
         </div>
 
 

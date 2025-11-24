@@ -65,7 +65,7 @@ const SignUp = () => {
     };
 
     return (
-        <AuthLayout title="Criar Conta" subtitle="Junte-se ao AgencyFlow">
+        <AuthLayout title="Criar Conta" subtitle="Junte-se ao StartinOS">
             <form onSubmit={handleSignUp} className="space-y-6">
                 {error && (
                     <div className="bg-retro-red/20 border-2 border-retro-red p-3 flex items-center gap-2 text-retro-red text-sm">
