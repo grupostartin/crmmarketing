@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Filter, Download, MoreVertical, AlertTriangle, DollarSign, Calendar, TrendingDown } from 'lucide-react';
+import { Plus, Filter, Download, MoreVertical, AlertTriangle, DollarSign, Calendar, TrendingDown, Edit, Trash2, FileDown } from 'lucide-react';
 import PixelButton from '../components/ui/PixelButton';
 import ContractModal from '../components/ContractModal';
 import { supabase } from '../lib/supabase';
@@ -18,9 +18,12 @@ interface Contract {
 
 const Contracts = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingContractId, setEditingContractId] = useState<string | null>(null);
     const [contracts, setContracts] = useState<Contract[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('Ativo');
+    const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+    const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
     useEffect(() => {
         fetchContracts();
@@ -80,19 +83,26 @@ const Contracts = () => {
         return new Date(dateString).toLocaleDateString('pt-BR');
     };
 
-    const handleExport = () => {
+    const handleExport = (contractId?: string) => {
         try {
+            const contractsToExport = contractId 
+                ? contracts.filter(c => c.id === contractId)
+                : contracts;
+
             const headers = ['Cliente', 'Título', 'MRR', 'Status', 'Início', 'Renovação'];
             const csvContent = [
                 headers.join(','),
-                ...contracts.map(c => [
-                    `"${c.contact?.name || ''}"`,
-                    `"${c.title}"`,
-                    c.mrr,
-                    c.status,
-                    c.start_date,
-                    c.renewal_date
-                ].join(','))
+                ...contractsToExport.map(c => {
+                    const escapeCsv = (str: string) => (str || '').replace(/"/g, '""');
+                    return [
+                        `"${escapeCsv(c.contact?.name || '')}"`,
+                        `"${escapeCsv(c.title)}"`,
+                        c.mrr,
+                        c.status,
+                        c.start_date || '',
+                        c.renewal_date || ''
+                    ].join(',');
+                })
             ].join('\n');
 
             // Add BOM for Excel compatibility
@@ -100,16 +110,58 @@ const Contracts = () => {
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', 'contratos.csv');
+            link.setAttribute('download', contractId ? `contrato_${contractId}.csv` : 'contratos.csv');
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             window.URL.revokeObjectURL(url);
+            setOpenMenuId(null);
         } catch (error) {
             console.error('Export failed:', error);
             alert('Erro ao exportar CSV');
         }
     };
+
+    const handleEdit = (contractId: string) => {
+        setEditingContractId(contractId);
+        setIsModalOpen(true);
+        setOpenMenuId(null);
+    };
+
+    const handleDelete = async (contractId: string) => {
+        try {
+            const { error } = await supabase
+                .from('contracts')
+                .delete()
+                .eq('id', contractId);
+
+            if (error) throw error;
+
+            setContracts(contracts.filter(c => c.id !== contractId));
+            setDeleteConfirm(null);
+            setOpenMenuId(null);
+        } catch (error) {
+            console.error('Erro ao deletar contrato:', error);
+            alert('Erro ao deletar contrato');
+        }
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as HTMLElement;
+            if (!target.closest('.actions-menu-container')) {
+                setOpenMenuId(null);
+            }
+        };
+
+        if (openMenuId) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [openMenuId]);
 
     return (
         <div className="space-y-8">
@@ -223,10 +275,39 @@ const Contracts = () => {
                                         {contract.status}
                                     </span>
                                 </div>
-                                <div className="col-span-1 text-center">
-                                    <button className="text-retro-comment hover:text-retro-fg transition-colors">
+                                <div className="col-span-1 text-center relative actions-menu-container">
+                                    <button 
+                                        onClick={() => setOpenMenuId(openMenuId === contract.id ? null : contract.id)}
+                                        className="text-retro-comment hover:text-retro-fg transition-colors"
+                                    >
                                         <MoreVertical size={18} />
                                     </button>
+                                    {openMenuId === contract.id && (
+                                        <div className="absolute right-0 top-full mt-2 bg-retro-bg border-4 border-black shadow-pixel z-50 min-w-[180px]">
+                                            <button
+                                                onClick={() => handleEdit(contract.id)}
+                                                className="w-full text-left px-4 py-2 hover:bg-retro-surface flex items-center gap-2 text-retro-fg"
+                                            >
+                                                <Edit size={16} />
+                                                Editar
+                                            </button>
+                                            <button
+                                                onClick={() => handleExport(contract.id)}
+                                                className="w-full text-left px-4 py-2 hover:bg-retro-surface flex items-center gap-2 text-retro-fg"
+                                            >
+                                                <FileDown size={16} />
+                                                Exportar
+                                            </button>
+                                            <div className="border-t-2 border-black"></div>
+                                            <button
+                                                onClick={() => setDeleteConfirm(contract.id)}
+                                                className="w-full text-left px-4 py-2 hover:bg-retro-red/20 flex items-center gap-2 text-retro-red"
+                                            >
+                                                <Trash2 size={16} />
+                                                Excluir
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ))
@@ -236,9 +317,44 @@ const Contracts = () => {
 
             <ContractModal
                 isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onSuccess={fetchContracts}
+                onClose={() => {
+                    setIsModalOpen(false);
+                    setEditingContractId(null);
+                }}
+                onSuccess={() => {
+                    fetchContracts();
+                    setEditingContractId(null);
+                }}
+                contractId={editingContractId || undefined}
             />
+
+            {/* Confirmação de exclusão */}
+            {deleteConfirm && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-retro-bg border-4 border-black shadow-pixel max-w-sm w-full p-6">
+                        <h3 className="font-header text-xl mb-4 text-retro-fg">Confirmar Exclusão</h3>
+                        <p className="text-retro-comment mb-6">
+                            Tem certeza que deseja excluir este contrato? Esta ação não pode ser desfeita.
+                        </p>
+                        <div className="flex gap-3">
+                            <PixelButton
+                                variant="secondary"
+                                onClick={() => setDeleteConfirm(null)}
+                                className="flex-1"
+                            >
+                                Cancelar
+                            </PixelButton>
+                            <PixelButton
+                                variant="danger"
+                                onClick={() => handleDelete(deleteConfirm)}
+                                className="flex-1"
+                            >
+                                Excluir
+                            </PixelButton>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

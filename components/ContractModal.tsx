@@ -11,9 +11,10 @@ interface ContractModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess: () => void;
+    contractId?: string;
 }
 
-const ContractModal: React.FC<ContractModalProps> = ({ isOpen, onClose, onSuccess }) => {
+const ContractModal: React.FC<ContractModalProps> = ({ isOpen, onClose, onSuccess, contractId }) => {
     const [loading, setLoading] = useState(false);
     const [contacts, setContacts] = useState<Contact[]>([]);
     const [formData, setFormData] = useState({
@@ -28,8 +29,49 @@ const ContractModal: React.FC<ContractModalProps> = ({ isOpen, onClose, onSucces
     useEffect(() => {
         if (isOpen) {
             fetchContacts();
+            if (contractId) {
+                fetchContract();
+            } else {
+                resetForm();
+            }
         }
-    }, [isOpen]);
+    }, [isOpen, contractId]);
+
+    const fetchContract = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('contracts')
+                .select('*')
+                .eq('id', contractId)
+                .single();
+
+            if (error) throw error;
+
+            if (data) {
+                setFormData({
+                    contact_id: data.contact_id || '',
+                    title: data.title || '',
+                    mrr: Number(data.mrr) || 0,
+                    status: data.status || 'Ativo',
+                    start_date: data.start_date ? data.start_date.split('T')[0] : new Date().toISOString().split('T')[0],
+                    renewal_date: data.renewal_date ? data.renewal_date.split('T')[0] : ''
+                });
+            }
+        } catch (error) {
+            console.error('Erro ao buscar contrato:', error);
+        }
+    };
+
+    const resetForm = () => {
+        setFormData({
+            contact_id: '',
+            title: '',
+            mrr: 0,
+            status: 'Ativo',
+            start_date: new Date().toISOString().split('T')[0],
+            renewal_date: ''
+        });
+    };
 
     const fetchContacts = async () => {
         const { data } = await supabase
@@ -47,31 +89,42 @@ const ContractModal: React.FC<ContractModalProps> = ({ isOpen, onClose, onSucces
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error('Usuário não autenticado');
 
-            const { error } = await supabase
-                .from('contracts')
-                .insert([
-                    {
-                        ...formData,
-                        user_id: user.id,
-                        created_at: new Date().toISOString()
-                    }
-                ]);
+            if (contractId) {
+                // Atualizar contrato existente
+                const { error } = await supabase
+                    .from('contracts')
+                    .update({
+                        contact_id: formData.contact_id,
+                        title: formData.title,
+                        mrr: formData.mrr,
+                        status: formData.status,
+                        start_date: formData.start_date,
+                        renewal_date: formData.renewal_date || null
+                    })
+                    .eq('id', contractId);
 
-            if (error) throw error;
+                if (error) throw error;
+            } else {
+                // Criar novo contrato
+                const { error } = await supabase
+                    .from('contracts')
+                    .insert([
+                        {
+                            ...formData,
+                            user_id: user.id,
+                            created_at: new Date().toISOString()
+                        }
+                    ]);
+
+                if (error) throw error;
+            }
 
             onSuccess();
             onClose();
-            setFormData({
-                contact_id: '',
-                title: '',
-                mrr: 0,
-                status: 'Ativo',
-                start_date: new Date().toISOString().split('T')[0],
-                renewal_date: ''
-            });
+            resetForm();
         } catch (error) {
-            console.error('Error adding contract:', error);
-            alert('Erro ao adicionar contrato');
+            console.error('Error saving contract:', error);
+            alert(contractId ? 'Erro ao atualizar contrato' : 'Erro ao adicionar contrato');
         } finally {
             setLoading(false);
         }
@@ -83,7 +136,7 @@ const ContractModal: React.FC<ContractModalProps> = ({ isOpen, onClose, onSucces
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-retro-surface border-4 border-black shadow-pixel w-full max-w-md relative animate-in fade-in zoom-in duration-200">
                 <div className="bg-retro-bg border-b-4 border-black p-4 flex justify-between items-center">
-                    <h2 className="font-header text-xl text-retro-fg uppercase">Novo Contrato</h2>
+                    <h2 className="font-header text-xl text-retro-fg uppercase">{contractId ? 'Editar Contrato' : 'Novo Contrato'}</h2>
                     <button onClick={onClose} className="text-retro-comment hover:text-retro-red transition-colors">
                         <X size={24} />
                     </button>

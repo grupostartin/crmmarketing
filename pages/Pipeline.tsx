@@ -20,7 +20,7 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Plus, DollarSign, User, Calendar } from 'lucide-react';
+import { Plus, DollarSign, User, Calendar, Trash2 } from 'lucide-react';
 import PixelButton from '../components/ui/PixelButton';
 import DealModal from '../components/DealModal';
 import { supabase } from '../lib/supabase';
@@ -38,7 +38,7 @@ interface Deal {
 
 const STAGES = ['Novos Leads', 'Contatado', 'Qualificado', 'Proposta', 'Negociação', 'Fechado'];
 
-const SortableItem = ({ deal }: { deal: Deal }) => {
+const SortableItem = ({ deal, onDelete }: { deal: Deal; onDelete: (dealId: string) => void }) => {
   const {
     attributes,
     listeners,
@@ -68,21 +68,32 @@ const SortableItem = ({ deal }: { deal: Deal }) => {
       ref={setNodeRef}
       style={style}
       {...attributes}
-      {...listeners}
-      className="bg-retro-surface border-2 border-black p-4 shadow-pixel hover:border-retro-cyan cursor-grab active:cursor-grabbing group"
+      className="bg-retro-surface border-2 border-black p-4 shadow-pixel hover:border-retro-cyan group relative"
     >
-      <h3 className="font-header text-sm text-retro-fg mb-2">{deal.title}</h3>
-      <div className="space-y-1">
-        <p className="text-retro-comment text-xs flex items-center gap-1">
-          <User size={12} /> {deal.contact?.name}
-        </p>
-        <p className="text-retro-green text-xs flex items-center gap-1 font-bold">
-          <DollarSign size={12} /> {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(deal.value)}
-        </p>
-        <p className="text-retro-comment/60 text-[10px] flex items-center gap-1 pt-2 border-t border-black/20 mt-2">
-          <Calendar size={10} /> {new Date(deal.created_at).toLocaleDateString('pt-BR')}
-        </p>
+      <div {...listeners} className="cursor-grab active:cursor-grabbing">
+        <h3 className="font-header text-sm text-retro-fg mb-2">{deal.title}</h3>
+        <div className="space-y-1">
+          <p className="text-retro-comment text-xs flex items-center gap-1">
+            <User size={12} /> {deal.contact?.name}
+          </p>
+          <p className="text-retro-green text-xs flex items-center gap-1 font-bold">
+            <DollarSign size={12} /> {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(deal.value)}
+          </p>
+          <p className="text-retro-comment/60 text-[10px] flex items-center gap-1 pt-2 border-t border-black/20 mt-2">
+            <Calendar size={10} /> {new Date(deal.created_at).toLocaleDateString('pt-BR')}
+          </p>
+        </div>
       </div>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete(deal.id);
+        }}
+        className="absolute top-2 right-2 p-1.5 hover:bg-retro-red hover:text-white border-2 border-black transition-colors opacity-0 group-hover:opacity-100 z-10"
+        title="Deletar negócio"
+      >
+        <Trash2 size={14} />
+      </button>
     </div>
   );
 };
@@ -92,6 +103,7 @@ const Pipeline = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [activeDeal, setActiveDeal] = useState<Deal | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -118,6 +130,23 @@ const Pipeline = () => {
       .order('created_at', { ascending: false });
 
     if (data) setDeals(data);
+  };
+
+  const handleDeleteDeal = async (dealId: string) => {
+    try {
+      const { error } = await supabase
+        .from('deals')
+        .delete()
+        .eq('id', dealId);
+
+      if (error) throw error;
+
+      setDeals(deals.filter(d => d.id !== dealId));
+      setDeleteConfirm(null);
+    } catch (error) {
+      console.error('Error deleting deal:', error);
+      alert('Erro ao deletar negócio');
+    }
   };
 
   const onDragStart = (event: DragStartEvent) => {
@@ -267,7 +296,7 @@ const Pipeline = () => {
                     {deals
                       .filter((deal) => deal.stage === stage)
                       .map((deal) => (
-                        <SortableItem key={deal.id} deal={deal} />
+                        <SortableItem key={deal.id} deal={deal} onDelete={setDeleteConfirm} />
                       ))}
                   </ColumnDroppable>
                 </div>
@@ -298,6 +327,32 @@ const Pipeline = () => {
         onClose={() => setIsModalOpen(false)}
         onSuccess={fetchDeals}
       />
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+          <div className="bg-retro-bg border-4 border-black p-8 shadow-pixel max-w-md mx-4">
+            <h3 className="font-header text-xl text-retro-fg mb-4">Confirmar Exclusão</h3>
+            <p className="text-retro-comment mb-6">
+              Tem certeza que deseja deletar este negócio? Esta ação não pode ser desfeita.
+            </p>
+            <div className="flex gap-4">
+              <button
+                onClick={() => handleDeleteDeal(deleteConfirm)}
+                className="flex-1 bg-retro-red hover:bg-retro-red/90 text-white font-bold py-2 px-4 border-b-4 border-r-4 border-black active:border-0 active:translate-y-1 active:ml-1 transition-all uppercase"
+              >
+                Deletar
+              </button>
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                className="flex-1 bg-retro-surface hover:bg-retro-comment/20 text-retro-fg font-bold py-2 px-4 border-b-4 border-r-4 border-black active:border-0 active:translate-y-1 active:ml-1 transition-all uppercase"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

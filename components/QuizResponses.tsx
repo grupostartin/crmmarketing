@@ -48,25 +48,42 @@ const QuizResponses: React.FC<QuizResponsesProps> = ({ quizId, isOpen, onClose }
 
     const handleDelete = async (responseId: string) => {
         try {
+            console.log('Deletando resposta:', responseId);
+
+            // 1. Deletar quiz_answers primeiro
             const { error: answersError } = await supabase
                 .from('quiz_answers')
                 .delete()
                 .eq('response_id', responseId);
 
-            if (answersError) throw answersError;
+            if (answersError) {
+                console.error('Erro ao deletar quiz_answers:', answersError);
+                throw answersError;
+            }
 
+            console.log('quiz_answers deletados com sucesso');
+
+            // 2. Deletar quiz_responses
             const { error: responseError } = await supabase
                 .from('quiz_responses')
                 .delete()
                 .eq('id', responseId);
 
-            if (responseError) throw responseError;
+            if (responseError) {
+                console.error('Erro ao deletar quiz_responses:', responseError);
+                throw responseError;
+            }
 
+            console.log('quiz_responses deletado com sucesso');
+
+            // 3. Atualizar lista local
             setResponses(responses.filter(r => r.id !== responseId));
             setDeleteConfirm(null);
-        } catch (error) {
+
+            alert('Resposta deletada com sucesso!');
+        } catch (error: any) {
             console.error('Error deleting response:', error);
-            alert('Erro ao deletar resposta.');
+            alert(`Erro ao deletar resposta: ${error.message || 'Erro desconhecido'}`);
         }
     };
 

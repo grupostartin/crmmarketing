@@ -10,6 +10,7 @@ interface Quiz {
     id: string;
     title: string;
     description: string;
+    user_id: string;
 }
 
 interface Question {
@@ -150,8 +151,9 @@ const PublicQuiz = () => {
                 .insert([{
                     title: `${respondent.name} - Quiz: ${quiz.title}`,
                     contact_id: contact.id,
+                    user_id: quiz.user_id,
                     value: 0,
-                    status: 'Novos Leads',
+                    stage: 'Novos Leads',
                     created_at: new Date().toISOString()
                 }]);
 
