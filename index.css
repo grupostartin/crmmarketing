@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Default Dark Theme (Dracula) */
+  --retro-bg: #282a36;
+  --retro-surface: #44475a;
+  --retro-fg: #f8f8f2;
+  --retro-comment: #6272a4;
+  --retro-cyan: #8be9fd;
+  --retro-green: #50fa7b;
+  --retro-orange: #ffb86c;
+  --retro-pink: #ff79c6;
+  --retro-purple: #bd93f9;
+  --retro-red: #ff5555;
+  --retro-yellow: #f1fa8c;
+}
+
+.theme-light {
+  /* Light Theme */
+  --retro-bg: #f0f2f5;
+  --retro-surface: #ffffff;
+  --retro-fg: #2d3436;
+  --retro-comment: #636e72;
+  --retro-cyan: #0984e3;
+  --retro-green: #00b894;
+  --retro-orange: #e17055;
+  --retro-pink: #e84393;
+  --retro-purple: #6c5ce7;
+  --retro-red: #d63031;
+  --retro-yellow: #fdcb6e;
+}
+
+/* Font Styles */
+.font-retro {
+  font-family: "VT323", monospace;
+}
+
+.font-retro h1,
+.font-retro h2,
+.font-retro h3,
+.font-retro h4,
+.font-retro h5,
+.font-retro h6,
+.font-retro .font-header {
+  font-family: "Press Start 2P", cursive;
+}
+
+.font-sans {
+  font-family: "Inter", sans-serif;
+}
+
+.font-sans h1,
+.font-sans h2,
+.font-sans h3,
+.font-sans h4,
+.font-sans h5,
+.font-sans h6,
+.font-sans .font-header {
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Base Body Style */
+body {
+  background-color: var(--retro-bg);
+  color: var(--retro-fg);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-track {
+  background: var(--retro-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--retro-comment);
+  border: 2px solid var(--retro-bg);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--retro-purple);
+}

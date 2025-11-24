@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AgencyFlow CRM</title>
+  <meta name="description" content="CRM em Pixel Art para Agências" />
+
+  <!-- Google Fonts: VT323 for body text, Press Start 2P for headings -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            'header': ['"Press Start 2P"', 'cursive'],
+            'body': ['"VT323"', 'monospace'],
+            'sans': ['"Inter"', 'sans-serif'],
+          },
+          colors: {
+            retro: {
+              bg: 'var(--retro-bg)',
+              surface: 'var(--retro-surface)',
+              fg: 'var(--retro-fg)',
+              comment: 'var(--retro-comment)',
+              cyan: 'var(--retro-cyan)',
+              green: 'var(--retro-green)',
+              orange: 'var(--retro-orange)',
+              pink: 'var(--retro-pink)',
+              purple: 'var(--retro-purple)',
+              red: 'var(--retro-red)',
+              yellow: 'var(--retro-yellow)',
+            }
+          },
+          boxShadow: {
+            'pixel': '4px 4px 0px 0px rgba(0,0,0,1)',
+            'pixel-sm': '2px 2px 0px 0px rgba(0,0,0,1)',
+            'pixel-hover': '2px 2px 0px 0px rgba(0,0,0,1)',
+          }
+        },
+      },
+    }
+  </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
+    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.6",
+    "recharts": "https://aistudiocdn.com/recharts@^3.5.0"
+  }
+}
+</script>
+  <link rel="stylesheet" href="/index.css">
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+
+</html>
