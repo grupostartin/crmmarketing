@@ -224,10 +224,9 @@ export const AgencyProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const removeMember = async (memberId: string) => {
-    const { error } = await supabase
-      .from('agency_users')
-      .delete()
-      .eq('id', memberId);
+    const { error } = await supabase.rpc('delete_agency_member', {
+      p_member_id: memberId
+    });
 
     if (error) throw error;
     await loadData();
