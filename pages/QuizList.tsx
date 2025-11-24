@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
-import { Plus, FileQuestion, Users, CheckCircle, XCircle, Trash2 } from 'lucide-react';
+import { Plus, FileQuestion, Users, CheckCircle, XCircle, Trash2, Lock } from 'lucide-react';
+import { usePlanLimits } from '../hooks/usePlanLimits';
 
 interface Quiz {
     id: string;
@@ -17,7 +18,9 @@ const QuizList = () => {
     const [quizzes, setQuizzes] = useState<Quiz[]>([]);
     const [loading, setLoading] = useState(true);
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+    const [showLimitModal, setShowLimitModal] = useState(false);
     const navigate = useNavigate();
+    const { checkLimit, currentPlan } = usePlanLimits();
 
     useEffect(() => {
         fetchQuizzes();
@@ -109,6 +112,10 @@ const QuizList = () => {
     };
 
     const handleCreateNew = () => {
+        if (checkLimit('quizzes', quizzes.length)) {
+            setShowLimitModal(true);
+            return;
+        }
         navigate('/quiz/builder');
     };
 
@@ -236,6 +243,37 @@ const QuizList = () => {
                                 className="flex-1 bg-retro-surface hover:bg-retro-comment/20 text-retro-fg font-bold py-2 px-4 border-b-4 border-r-4 border-black active:border-0 active:translate-y-1 active:ml-1 transition-all uppercase"
                             >
                                 Cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Limit Modal */}
+            {showLimitModal && (
+                <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+                    <div className="bg-retro-bg border-4 border-black p-8 shadow-pixel max-w-md mx-4 relative">
+                        <div className="absolute -top-6 -left-6 bg-retro-yellow border-4 border-black p-2 shadow-pixel">
+                            <Lock size={32} className="text-black" />
+                        </div>
+                        <h3 className="font-header text-2xl text-retro-fg mb-4 mt-2">Limite Atingido</h3>
+                        <p className="text-retro-comment mb-6 text-lg">
+                            Você atingiu o limite de <strong>1 Quiz</strong> do plano Grátis.
+                            <br /><br />
+                            Faça upgrade para o plano <strong>Pro</strong> para criar quizzes ilimitados e desbloquear todos os recursos.
+                        </p>
+                        <div className="flex gap-4">
+                            <button
+                                onClick={() => navigate('/plans')}
+                                className="flex-1 bg-retro-cyan hover:bg-retro-cyan/90 text-black font-bold py-3 px-4 border-b-4 border-r-4 border-black active:border-0 active:translate-y-1 active:ml-1 transition-all uppercase"
+                            >
+                                Ver Planos
+                            </button>
+                            <button
+                                onClick={() => setShowLimitModal(false)}
+                                className="flex-1 bg-retro-surface hover:bg-retro-comment/20 text-retro-fg font-bold py-3 px-4 border-b-4 border-r-4 border-black active:border-0 active:translate-y-1 active:ml-1 transition-all uppercase"
+                            >
+                                Fechar
                             </button>
                         </div>
                     </div>

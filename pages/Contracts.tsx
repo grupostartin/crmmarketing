@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Filter, Download, MoreVertical, AlertTriangle, DollarSign, Calendar, TrendingDown, Edit, Trash2, FileDown } from 'lucide-react';
+import { Plus, Filter, Download, MoreVertical, AlertTriangle, DollarSign, Calendar, TrendingDown, Edit, Trash2, FileDown, Lock } from 'lucide-react';
 import PixelButton from '../components/ui/PixelButton';
 import ContractModal from '../components/ContractModal';
 import { supabase } from '../lib/supabase';
+import { usePlanLimits } from '../hooks/usePlanLimits';
+import { useNavigate } from 'react-router-dom';
 
 interface Contract {
     id: string;
@@ -24,6 +26,10 @@ const Contracts = () => {
     const [activeTab, setActiveTab] = useState('Ativo');
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+    const [showLimitModal, setShowLimitModal] = useState(false);
+
+    const { checkLimit } = usePlanLimits();
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchContracts();
@@ -85,7 +91,7 @@ const Contracts = () => {
 
     const handleExport = (contractId?: string) => {
         try {
-            const contractsToExport = contractId 
+            const contractsToExport = contractId
                 ? contracts.filter(c => c.id === contractId)
                 : contracts;
 
@@ -146,6 +152,14 @@ const Contracts = () => {
         }
     };
 
+    const handleNewContract = () => {
+        if (checkLimit('contracts', contracts.length)) {
+            setShowLimitModal(true);
+            return;
+        }
+        setIsModalOpen(true);
+    };
+
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             const target = event.target as HTMLElement;
@@ -168,10 +182,10 @@ const Contracts = () => {
             <div className="flex justify-between items-center">
                 <h1 className="font-header text-3xl text-retro-fg">Gestão de Contratos</h1>
                 <div className="flex gap-4">
-                    <PixelButton variant="secondary" onClick={handleExport}>
+                    <PixelButton variant="secondary" onClick={() => handleExport()}>
                         <Download size={16} className="mr-2" /> EXPORTAR CSV
                     </PixelButton>
-                    <PixelButton variant="primary" onClick={() => setIsModalOpen(true)}>
+                    <PixelButton variant="primary" onClick={handleNewContract}>
                         <Plus size={16} className="mr-2" /> NOVO CONTRATO
                     </PixelButton>
                 </div>
@@ -276,7 +290,7 @@ const Contracts = () => {
                                     </span>
                                 </div>
                                 <div className="col-span-1 text-center relative actions-menu-container">
-                                    <button 
+                                    <button
                                         onClick={() => setOpenMenuId(openMenuId === contract.id ? null : contract.id)}
                                         className="text-retro-comment hover:text-retro-fg transition-colors"
                                     >
@@ -351,6 +365,37 @@ const Contracts = () => {
                             >
                                 Excluir
                             </PixelButton>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Limit Modal */}
+            {showLimitModal && (
+                <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+                    <div className="bg-retro-bg border-4 border-black p-8 shadow-pixel max-w-md mx-4 relative">
+                        <div className="absolute -top-6 -left-6 bg-retro-yellow border-4 border-black p-2 shadow-pixel">
+                            <Lock size={32} className="text-black" />
+                        </div>
+                        <h3 className="font-header text-2xl text-retro-fg mb-4 mt-2">Limite Atingido</h3>
+                        <p className="text-retro-comment mb-6 text-lg">
+                            Você atingiu o limite de <strong>5 Contratos</strong> do plano Grátis.
+                            <br /><br />
+                            Faça upgrade para o plano <strong>Pro</strong> para gerenciar contratos ilimitados e desbloquear todos os recursos.
+                        </p>
+                        <div className="flex gap-4">
+                            <button
+                                onClick={() => navigate('/plans')}
+                                className="flex-1 bg-retro-cyan hover:bg-retro-cyan/90 text-black font-bold py-3 px-4 border-b-4 border-r-4 border-black active:border-0 active:translate-y-1 active:ml-1 transition-all uppercase"
+                            >
+                                Ver Planos
+                            </button>
+                            <button
+                                onClick={() => setShowLimitModal(false)}
+                                className="flex-1 bg-retro-surface hover:bg-retro-comment/20 text-retro-fg font-bold py-3 px-4 border-b-4 border-r-4 border-black active:border-0 active:translate-y-1 active:ml-1 transition-all uppercase"
+                            >
+                                Fechar
+                            </button>
                         </div>
                     </div>
                 </div>

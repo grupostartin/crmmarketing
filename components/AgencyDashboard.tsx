@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { useAgency, Role } from '../context/AgencyContext';
 import PixelButton from './ui/PixelButton';
 import PixelCard from './ui/PixelCard';
-import { Users, Plus, Trash2, Crown, Briefcase, User, Edit2, Save, X, Link as LinkIcon, Copy, Check } from 'lucide-react';
+import { Users, Plus, Trash2, Crown, Briefcase, User, Edit2, Save, X, Link as LinkIcon, Copy, Check, Lock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { usePlanLimits } from '../hooks/usePlanLimits';
+import { useNavigate } from 'react-router-dom';
 
 const AgencyDashboard = () => {
   const { agency, members, currentUserRole, loading, addMember, removeMember, updateAgencyName, refresh } = useAgency();
@@ -20,6 +22,10 @@ const AgencyDashboard = () => {
   const [inviteRole, setInviteRole] = useState<Role>('staff');
   const [generatedLink, setGeneratedLink] = useState('');
   const [copyingLink, setCopyingLink] = useState(false);
+  const [showLimitModal, setShowLimitModal] = useState(false);
+
+  const { checkLimit } = usePlanLimits();
+  const navigate = useNavigate();
 
   const canManageMembers = currentUserRole === 'owner' || currentUserRole === 'manager';
   const canEditAgency = currentUserRole === 'owner';
@@ -220,6 +226,22 @@ const AgencyDashboard = () => {
     setInviteRole('staff');
   };
 
+  const handleOpenInviteModal = () => {
+    if (checkLimit('users', members.length)) {
+      setShowLimitModal(true);
+      return;
+    }
+    setShowInviteModal(true);
+  };
+
+  const handleToggleAddMember = () => {
+    if (!showAddMember && checkLimit('users', members.length)) {
+      setShowLimitModal(true);
+      return;
+    }
+    setShowAddMember(!showAddMember);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-96">
@@ -349,7 +371,7 @@ const AgencyDashboard = () => {
             <div className="flex justify-end gap-3">
               <PixelButton
                 variant="secondary"
-                onClick={() => setShowInviteModal(true)}
+                onClick={handleOpenInviteModal}
                 className="flex items-center gap-2"
               >
                 <LinkIcon size={16} />
@@ -357,7 +379,7 @@ const AgencyDashboard = () => {
               </PixelButton>
               <PixelButton
                 variant="primary"
-                onClick={() => setShowAddMember(!showAddMember)}
+                onClick={handleToggleAddMember}
                 className="flex items-center gap-2"
               >
                 <Plus size={16} />
@@ -560,6 +582,37 @@ const AgencyDashboard = () => {
           </div>
         </div>
       </PixelCard>
+
+      {/* Limit Modal */}
+      {showLimitModal && (
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+          <div className="bg-retro-bg border-4 border-black p-8 shadow-pixel max-w-md mx-4 relative">
+            <div className="absolute -top-6 -left-6 bg-retro-yellow border-4 border-black p-2 shadow-pixel">
+              <Lock size={32} className="text-black" />
+            </div>
+            <h3 className="font-header text-2xl text-retro-fg mb-4 mt-2">Limite Atingido</h3>
+            <p className="text-retro-comment mb-6 text-lg">
+              Você atingiu o limite de <strong>3 Usuários</strong> do plano Grátis.
+              <br /><br />
+              Faça upgrade para o plano <strong>Pro</strong> para adicionar membros ilimitados e desbloquear todos os recursos.
+            </p>
+            <div className="flex gap-4">
+              <button
+                onClick={() => navigate('/plans')}
+                className="flex-1 bg-retro-cyan hover:bg-retro-cyan/90 text-black font-bold py-3 px-4 border-b-4 border-r-4 border-black active:border-0 active:translate-y-1 active:ml-1 transition-all uppercase"
+              >
+                Ver Planos
+              </button>
+              <button
+                onClick={() => setShowLimitModal(false)}
+                className="flex-1 bg-retro-surface hover:bg-retro-comment/20 text-retro-fg font-bold py-3 px-4 border-b-4 border-r-4 border-black active:border-0 active:translate-y-1 active:ml-1 transition-all uppercase"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

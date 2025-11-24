@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import PixelButton from '../components/ui/PixelButton';
-import { Filter, Download, Mail, Phone, Tag, Trash2 } from 'lucide-react';
+import { Filter, Download, Mail, Phone, Tag, Trash2, Lock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import ContactModal from '../components/ContactModal';
 import ContactProfile from '../components/ContactProfile';
 import ActivityModal from '../components/ActivityModal';
+import { usePlanLimits } from '../hooks/usePlanLimits';
+import { useNavigate } from 'react-router-dom';
 
 interface Contact {
     id: string;
@@ -30,6 +32,10 @@ const Contacts = () => {
     const [showActivityModal, setShowActivityModal] = useState(false);
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
     const [deleteWarning, setDeleteWarning] = useState<{ contactId: string; hasRelations: boolean } | null>(null);
+    const [showLimitModal, setShowLimitModal] = useState(false);
+
+    const { checkLimit } = usePlanLimits();
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchContacts();
@@ -100,7 +106,7 @@ const Contacts = () => {
 
     const handleExport = () => {
         const csvLines: string[] = [];
-        
+
         // Cabeçalho
         csvLines.push('RELATÓRIO DE CONTATOS');
         csvLines.push(`Data de Exportação: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}`);
@@ -207,6 +213,14 @@ const Contacts = () => {
         return new Date(dateString).toLocaleDateString('pt-BR');
     };
 
+    const handleAddContact = () => {
+        if (checkLimit('clients', contacts.length)) {
+            setShowLimitModal(true);
+            return;
+        }
+        setIsModalOpen(true);
+    };
+
     return (
         <div className="space-y-8">
             <div className="flex justify-between items-center">
@@ -214,7 +228,7 @@ const Contacts = () => {
                     <h1 className="font-header text-3xl text-retro-fg">Contatos</h1>
                     <p className="text-retro-comment text-lg">Visualize e gerencie seus leads.</p>
                 </div>
-                <PixelButton variant="primary" onClick={() => setIsModalOpen(true)}>+ Adicionar Contato</PixelButton>
+                <PixelButton variant="primary" onClick={handleAddContact}>+ Adicionar Contato</PixelButton>
             </div>
 
             {/* Filter Bar */}
@@ -230,8 +244,8 @@ const Contacts = () => {
                         />
                     </div>
                     <div className="relative filter-menu-container">
-                        <PixelButton 
-                            variant="secondary" 
+                        <PixelButton
+                            variant="secondary"
                             className="flex items-center gap-2"
                             onClick={() => setShowFilterMenu(!showFilterMenu)}
                         >
@@ -322,12 +336,12 @@ const Contacts = () => {
             ) : filteredContacts.length === 0 ? (
                 <div className="text-center py-20 border-4 border-dashed border-retro-comment/30 rounded-lg">
                     <p className="text-retro-comment text-xl mb-4">
-                        {contacts.length === 0 
-                            ? 'Nenhum contato encontrado.' 
+                        {contacts.length === 0
+                            ? 'Nenhum contato encontrado.'
                             : 'Nenhum contato corresponde aos filtros aplicados.'}
                     </p>
                     {contacts.length === 0 && (
-                        <PixelButton variant="primary" onClick={() => setIsModalOpen(true)}>Adicionar o primeiro</PixelButton>
+                        <PixelButton variant="primary" onClick={handleAddContact}>Adicionar o primeiro</PixelButton>
                     )}
                 </div>
             ) : (
@@ -380,14 +394,14 @@ const Contacts = () => {
                                 </div>
 
                                 <div className="border-t-4 border-black -mx-6 -mb-6 bg-retro-bg p-3 flex justify-between">
-                                    <button 
+                                    <button
                                         onClick={() => handleViewProfile(contact.id)}
                                         className="flex-1 text-center hover:text-retro-cyan transition-colors font-header text-xs uppercase"
                                     >
                                         Ver Perfil
                                     </button>
                                     <div className="w-1 bg-black self-stretch"></div>
-                                    <button 
+                                    <button
                                         onClick={() => handleRegisterActivity(contact.id)}
                                         className="flex-1 text-center hover:text-retro-pink transition-colors font-header text-xs uppercase"
                                     >
@@ -488,6 +502,37 @@ const Contacts = () => {
                         onSuccess={fetchContacts}
                     />
                 </>
+            )}
+
+            {/* Limit Modal */}
+            {showLimitModal && (
+                <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+                    <div className="bg-retro-bg border-4 border-black p-8 shadow-pixel max-w-md mx-4 relative">
+                        <div className="absolute -top-6 -left-6 bg-retro-yellow border-4 border-black p-2 shadow-pixel">
+                            <Lock size={32} className="text-black" />
+                        </div>
+                        <h3 className="font-header text-2xl text-retro-fg mb-4 mt-2">Limite Atingido</h3>
+                        <p className="text-retro-comment mb-6 text-lg">
+                            Você atingiu o limite de <strong>5 Clientes</strong> do plano Grátis.
+                            <br /><br />
+                            Faça upgrade para o plano <strong>Pro</strong> para gerenciar clientes ilimitados e desbloquear todos os recursos.
+                        </p>
+                        <div className="flex gap-4">
+                            <button
+                                onClick={() => navigate('/plans')}
+                                className="flex-1 bg-retro-cyan hover:bg-retro-cyan/90 text-black font-bold py-3 px-4 border-b-4 border-r-4 border-black active:border-0 active:translate-y-1 active:ml-1 transition-all uppercase"
+                            >
+                                Ver Planos
+                            </button>
+                            <button
+                                onClick={() => setShowLimitModal(false)}
+                                className="flex-1 bg-retro-surface hover:bg-retro-comment/20 text-retro-fg font-bold py-3 px-4 border-b-4 border-r-4 border-black active:border-0 active:translate-y-1 active:ml-1 transition-all uppercase"
+                            >
+                                Fechar
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

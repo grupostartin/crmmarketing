@@ -122,6 +122,34 @@ const Header = () => {
   );
 };
 
+const PlanBanner = () => {
+  const { agency, currentUserRole } = useAgency();
+  if (!agency || agency.subscription_tier !== 'free') return null;
+
+  return (
+    <div className="bg-retro-yellow border-4 border-black p-4 mb-8 shadow-pixel flex flex-col md:flex-row justify-between items-center gap-4">
+      <div className="flex items-center gap-3">
+        <div className="bg-black text-retro-yellow p-2">
+          <Zap size={24} fill="currentColor" />
+        </div>
+        <div>
+          <p className="text-black font-bold text-lg leading-none">Plano Grátis Ativo</p>
+          <p className="text-black/80 text-sm">
+            {currentUserRole === 'owner'
+              ? 'Você possui limites de uso. Faça upgrade para remover restrições.'
+              : 'Peça ao gestor da agência para assinar o plano Pro.'}
+          </p>
+        </div>
+      </div>
+      {currentUserRole === 'owner' && (
+        <Link to="/plans" className="bg-black text-retro-yellow px-6 py-3 font-bold uppercase hover:bg-black/80 transition-colors border-2 border-transparent hover:border-white shadow-pixel-sm whitespace-nowrap">
+          Fazer Upgrade
+        </Link>
+      )}
+    </div>
+  );
+};
+
 const MainLayout = () => {
   return (
     <div className="min-h-screen bg-retro-bg text-retro-fg selection:bg-retro-pink selection:text-black">
@@ -129,6 +157,7 @@ const MainLayout = () => {
       <Header />
       <main className="ml-64 p-8">
         <EnvWarning />
+        <PlanBanner />
         <Outlet />
       </main>
     </div>
