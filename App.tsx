@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Trello, CheckSquare, FileText, Users, Settings as SettingsIcon, Search, Bell, LogOut, Building2 } from 'lucide-react';
+import { LayoutDashboard, Trello, CheckSquare, FileText, Users, Settings as SettingsIcon, Search, Bell, LogOut, Building2, Zap } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import Pipeline from './pages/Pipeline';
 import QuizBuilder from './pages/QuizBuilder';
@@ -18,6 +18,8 @@ import EnvWarning from './components/EnvWarning';
 import { supabase } from './lib/supabase';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { AgencyProvider } from './context/AgencyContext';
+
+import Plans from './pages/Plans';
 
 // --- Components ---
 
@@ -56,6 +58,7 @@ const Sidebar = () => {
         <SidebarItem to="/contracts" icon={FileText} label="Contratos" active={location.pathname === '/contracts'} />
         <SidebarItem to="/contacts" icon={Users} label="Contatos" active={location.pathname === '/contacts'} />
         <SidebarItem to="/agency" icon={Building2} label="Agência" active={location.pathname === '/agency'} />
+        <SidebarItem to="/plans" icon={Zap} label="Planos" active={location.pathname === '/plans'} />
       </nav>
 
       <div className="p-4 border-t-4 border-black mt-auto">
@@ -147,6 +150,7 @@ function App() {
                 <Route path="/contacts" element={<Contacts />} />
                 <Route path="/agency" element={<Agency />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/plans" element={<Plans />} />
               </Route>
             </Route>
           </Routes>

@@ -6,6 +6,8 @@ export type Role = 'owner' | 'manager' | 'staff';
 export type Agency = {
   id: string;
   name: string;
+  subscription_tier: 'free' | 'pro';
+  subscription_status: string;
 };
 
 export type Member = {
