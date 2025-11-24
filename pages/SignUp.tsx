@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import AuthLayout from '../components/AuthLayout';
-import { Mail, Lock, UserPlus, AlertCircle } from 'lucide-react';
+import { Mail, Lock, UserPlus, AlertCircle, User } from 'lucide-react';
 
 const SignUp = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -32,16 +34,22 @@ const SignUp = () => {
             const { error } = await supabase.auth.signUp({
                 email,
                 password,
+                options: {
+                    data: {
+                        full_name: fullName,
+                    },
+                },
             });
 
             if (error) throw error;
 
-            // Auto login or redirect to login with message
-            navigate('/');
+            // Check for redirect path
+            const from = location.state?.from || '/';
+            navigate(from);
         } catch (err: any) {
             // Melhorar mensagens de erro
             let errorMessage = 'Erro ao criar conta';
-            
+
             if (err.message?.includes('Supabase não está configurado')) {
                 errorMessage = 'Erro de configuração: Variáveis de ambiente do Supabase não estão configuradas.';
             } else if (err.message?.includes('Failed to fetch') || err.message?.includes('ERR_NAME_NOT_RESOLVED')) {
@@ -49,7 +57,7 @@ const SignUp = () => {
             } else if (err.message) {
                 errorMessage = err.message;
             }
-            
+
             setError(errorMessage);
         } finally {
             setLoading(false);
@@ -65,6 +73,23 @@ const SignUp = () => {
                         <span>{error}</span>
                     </div>
                 )}
+
+                <div className="space-y-2">
+                    <label className="block text-sm uppercase tracking-wider text-retro-comment">Nome Completo</label>
+                    <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <User size={18} className="text-retro-comment" />
+                        </div>
+                        <input
+                            type="text"
+                            value={fullName}
+                            onChange={(e) => setFullName(e.target.value)}
+                            className="w-full bg-retro-bg border-2 border-retro-comment focus:border-retro-green text-retro-fg pl-10 pr-3 py-2 outline-none transition-colors font-body text-lg"
+                            placeholder="Seu Nome"
+                            required
+                        />
+                    </div>
+                </div>
 
                 <div className="space-y-2">
                     <label className="block text-sm uppercase tracking-wider text-retro-comment">Email</label>

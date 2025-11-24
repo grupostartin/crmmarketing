@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAgency, Role } from '../context/AgencyContext';
 import PixelButton from './ui/PixelButton';
 import PixelCard from './ui/PixelCard';
-import { Users, Plus, Trash2, Crown, Briefcase, User, Edit2, Save, X } from 'lucide-react';
+import { Users, Plus, Trash2, Crown, Briefcase, User, Edit2, Save, X, Link as LinkIcon, Copy, Check } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 const AgencyDashboard = () => {
@@ -16,6 +16,10 @@ const AgencyDashboard = () => {
   const [showCreateAgency, setShowCreateAgency] = useState(false);
   const [newAgencyName, setNewAgencyName] = useState('');
   const [creatingAgency, setCreatingAgency] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteRole, setInviteRole] = useState<Role>('staff');
+  const [generatedLink, setGeneratedLink] = useState('');
+  const [copyingLink, setCopyingLink] = useState(false);
 
   const canManageMembers = currentUserRole === 'owner' || currentUserRole === 'manager';
   const canEditAgency = currentUserRole === 'owner';
@@ -152,7 +156,7 @@ const AgencyDashboard = () => {
 
       // Aguardar um pouco antes de recarregar para garantir que a transação foi commitada
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       // Recarregar dados com tratamento de erro
       try {
         await refresh();
@@ -161,7 +165,7 @@ const AgencyDashboard = () => {
         // Não mostrar erro ao usuário se a agência foi criada com sucesso
         // O refresh pode falhar temporariamente mas a agência já existe
       }
-      
+
       setShowCreateAgency(false);
       setNewAgencyName('');
       setCreatingAgency(false);
@@ -170,6 +174,50 @@ const AgencyDashboard = () => {
       setError(err.message || 'Erro ao criar agência');
       setCreatingAgency(false);
     }
+  };
+
+  const handleGenerateInvite = async () => {
+    if (!agency) return;
+
+    try {
+      const token = crypto.randomUUID();
+      // Calculate expiration (e.g., 7 days)
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7);
+
+      const { error } = await supabase
+        .from('agency_invitations')
+        .insert({
+          agency_id: agency.id,
+          token: token,
+          role: inviteRole,
+          expires_at: expiresAt.toISOString()
+        });
+
+      if (error) throw error;
+
+      const link = `${window.location.origin}/invite/${token}`;
+      setGeneratedLink(link);
+    } catch (err: any) {
+      console.error('Error generating invite:', err);
+      alert('Erro ao gerar convite: ' + err.message);
+    }
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(generatedLink);
+      setCopyingLink(true);
+      setTimeout(() => setCopyingLink(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
+
+  const closeInviteModal = () => {
+    setShowInviteModal(false);
+    setGeneratedLink('');
+    setInviteRole('staff');
   };
 
   if (loading) {
@@ -298,15 +346,99 @@ const AgencyDashboard = () => {
       <PixelCard title="Membros da Agência">
         <div className="space-y-4">
           {canManageMembers && (
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-3">
+              <PixelButton
+                variant="secondary"
+                onClick={() => setShowInviteModal(true)}
+                className="flex items-center gap-2"
+              >
+                <LinkIcon size={16} />
+                Convidar via Link
+              </PixelButton>
               <PixelButton
                 variant="primary"
                 onClick={() => setShowAddMember(!showAddMember)}
                 className="flex items-center gap-2"
               >
                 <Plus size={16} />
-                Adicionar Membro
+                Adicionar por ID
               </PixelButton>
+            </div>
+          )}
+
+          {showInviteModal && (
+            <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 animate-fade-in p-4">
+              <div className="bg-retro-surface border-4 border-black p-6 shadow-pixel max-w-md w-full animate-bounce-in">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="font-header text-xl text-retro-fg">Gerar Link de Convite</h3>
+                  <button onClick={closeInviteModal} className="text-retro-comment hover:text-retro-red">
+                    <X size={24} />
+                  </button>
+                </div>
+
+                {!generatedLink ? (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-retro-comment text-sm mb-2 uppercase">
+                        Papel do Membro
+                      </label>
+                      <select
+                        value={inviteRole}
+                        onChange={(e) => setInviteRole(e.target.value as Role)}
+                        className="w-full bg-retro-bg border-2 border-black p-3 text-retro-fg focus:border-retro-cyan outline-none"
+                        disabled={currentUserRole !== 'owner'}
+                      >
+                        {currentUserRole === 'owner' && <option value="owner">Dono</option>}
+                        {currentUserRole === 'owner' && <option value="manager">Gerente</option>}
+                        <option value="staff">Geral</option>
+                      </select>
+                      {currentUserRole === 'manager' && (
+                        <p className="text-retro-comment text-xs mt-1">
+                          Gerentes só podem convidar membros com papel "Geral"
+                        </p>
+                      )}
+                    </div>
+
+                    <PixelButton
+                      variant="primary"
+                      className="w-full"
+                      onClick={handleGenerateInvite}
+                    >
+                      Gerar Link
+                    </PixelButton>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <p className="text-retro-comment text-sm">
+                      Compartilhe este link com a pessoa que você deseja convidar.
+                      O link expira em 7 dias.
+                    </p>
+
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={generatedLink}
+                        readOnly
+                        className="flex-1 bg-retro-bg border-2 border-black p-3 text-sm font-mono text-retro-fg"
+                      />
+                      <button
+                        onClick={handleCopyLink}
+                        className="bg-retro-cyan hover:bg-retro-cyan/90 text-black font-header text-sm py-2 px-4 border-b-4 border-r-4 border-black active:border-0 active:translate-y-1 active:ml-1 transition-all uppercase flex items-center gap-2"
+                      >
+                        {copyingLink ? <Check size={16} /> : <Copy size={16} />}
+                      </button>
+                    </div>
+
+                    <PixelButton
+                      variant="secondary"
+                      className="w-full"
+                      onClick={closeInviteModal}
+                    >
+                      Fechar
+                    </PixelButton>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

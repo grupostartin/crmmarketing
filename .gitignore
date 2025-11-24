@@ -31,5 +31,6 @@ dist-ssr
 
 # Documentation and SQL scripts
 *.sql
+!migrations/*.sql
 *.md
 !README.md

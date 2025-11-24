@@ -23,10 +23,20 @@
         extend: {
           fontFamily: {
             'header': ['"Press Start 2P"', 'cursive'],
+            'display': ['"Press Start 2P"', 'cursive'], // Added for LP
             'body': ['"VT323"', 'monospace'],
             'sans': ['"Inter"', 'sans-serif'],
           },
           colors: {
+            // LP Colors
+            primary: "#13ecc8", 
+            secondary: "#005fec", 
+            bgDark: "#0D1117",
+            cardDark: "#161B22",
+            borderDark: "#30363D",
+            accentPink: "#ff79c6",
+            accentYellow: "#F5A623",
+            
             retro: {
               bg: 'var(--retro-bg)',
               surface: 'var(--retro-surface)',
@@ -45,6 +55,28 @@
             'pixel': '4px 4px 0px 0px rgba(0,0,0,1)',
             'pixel-sm': '2px 2px 0px 0px rgba(0,0,0,1)',
             'pixel-hover': '2px 2px 0px 0px rgba(0,0,0,1)',
+            'pixel-white': '4px 4px 0px 0px #ffffff', // Added for LP
+            'glow': '0 0 40px -10px rgba(19, 236, 200, 0.3)', // Added for LP
+          },
+          animation: {
+            'grid-flow': 'grid-flow 20s linear infinite',
+            'neon-pulse': 'neon-pulse 2s ease-in-out infinite',
+          },
+          keyframes: {
+            'grid-flow': {
+              '0%': { transform: 'translateY(0)' },
+              '100%': { transform: 'translateY(40px)' },
+            },
+            'neon-pulse': {
+              '0%, 100%': { 
+                boxShadow: '0 0 20px rgba(19, 236, 200, 0.5), 4px 4px 0px 0px #000000',
+                borderColor: '#13ecc8'
+              },
+              '50%': { 
+                boxShadow: '0 0 5px rgba(19, 236, 200, 0.1), 4px 4px 0px 0px #000000',
+                borderColor: '#0b8a75'
+              }
+            }
           }
         },
       },

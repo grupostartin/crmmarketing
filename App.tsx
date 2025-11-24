@@ -12,6 +12,7 @@ import Settings from './pages/Settings';
 import Agency from './pages/Agency';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
+import InvitePage from './pages/InvitePage';
 import AuthLayout from './components/AuthLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import EnvWarning from './components/EnvWarning';
@@ -20,6 +21,7 @@ import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { AgencyProvider, useAgency } from './context/AgencyContext';
 
 import Plans from './pages/Plans';
+import LandingPage from './pages/LandingPage';
 
 // --- Components ---
 
@@ -139,9 +141,11 @@ function App() {
       <AgencyProvider>
         <Router>
           <Routes>
+            <Route path="/lp" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/quiz/public/:id" element={<PublicQuiz />} />
+            <Route path="/invite/:token" element={<InvitePage />} />
 
             <Route element={<ProtectedRoute />}>
               <Route element={<MainLayout />}>
