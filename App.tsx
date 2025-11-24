@@ -13,6 +13,7 @@ import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import AuthLayout from './components/AuthLayout';
 import ProtectedRoute from './components/ProtectedRoute';
+import EnvWarning from './components/EnvWarning';
 import { supabase } from './lib/supabase';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 
@@ -114,6 +115,7 @@ const MainLayout = () => {
       <Sidebar />
       <Header />
       <main className="ml-64 p-8">
+        <EnvWarning />
         <Outlet />
       </main>
     </div>
