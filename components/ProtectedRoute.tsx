@@ -7,28 +7,57 @@ const ProtectedRoute = () => {
     const [authenticated, setAuthenticated] = useState(false);
 
     useEffect(() => {
+        let mounted = true;
+
         const checkAuth = async () => {
             if (!supabase) {
-                setAuthenticated(false);
-                setLoading(false);
+                if (mounted) {
+                    setAuthenticated(false);
+                    setLoading(false);
+                }
                 return;
             }
 
-            const { data: { session } } = await supabase.auth.getSession();
-            setAuthenticated(!!session);
-            setLoading(false);
+            try {
+                // Race condition: if getSession takes too long (> 2s), treat as unauthenticated
+                // This prevents the "Loading..." screen from hanging indefinitely in tests or poor network
+                const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve({ data: { session: null } }), 2000));
+                const sessionPromise = supabase.auth.getSession();
+                
+                const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]) as any;
+
+                if (mounted) {
+                    setAuthenticated(!!session);
+                    setLoading(false);
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                if (mounted) {
+                    setAuthenticated(false);
+                    setLoading(false);
+                }
+            }
         };
 
         checkAuth();
 
         if (supabase) {
             const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-                setAuthenticated(!!session);
-                setLoading(false);
+                if (mounted) {
+                    setAuthenticated(!!session);
+                    setLoading(false);
+                }
             });
 
-            return () => subscription.unsubscribe();
+            return () => {
+                mounted = false;
+                subscription.unsubscribe();
+            };
         }
+
+        return () => {
+            mounted = false;
+        };
     }, []);
 
     if (loading) {

@@ -14,11 +14,15 @@ interface ActivityModalProps {
 const ActivityModal: React.FC<ActivityModalProps> = ({ isOpen, onClose, contactId, onSuccess }) => {
     const { agency } = useAgency();
     const [loading, setLoading] = useState(false);
+    const getSPDate = () => {
+        return new Date().toLocaleString('sv-SE', { timeZone: 'America/Sao_Paulo' }).replace(' ', 'T').slice(0, 16);
+    };
+
     const [formData, setFormData] = useState({
         type: 'Call',
         title: '',
         description: '',
-        activity_date: new Date().toISOString().slice(0, 16),
+        activity_date: getSPDate(),
     });
 
     if (!isOpen) return null;
@@ -57,7 +61,7 @@ const ActivityModal: React.FC<ActivityModalProps> = ({ isOpen, onClose, contactI
                 type: 'Call',
                 title: '',
                 description: '',
-                activity_date: new Date().toISOString().slice(0, 16),
+                activity_date: getSPDate(),
             });
         } catch (error) {
             console.error('Erro ao registrar atividade:', error);

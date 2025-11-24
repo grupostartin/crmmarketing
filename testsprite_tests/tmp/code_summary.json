@@ -1,0 +1,45 @@
+{
+  "tech_stack": ["TypeScript", "React", "Vite", "Supabase", "Tailwind CSS", "Stripe"],
+  "features": [
+    {
+      "name": "Authentication",
+      "description": "User login, signup, and protection mechanisms.",
+      "files": ["pages/Login.tsx", "pages/SignUp.tsx", "components/AuthLayout.tsx", "components/ProtectedRoute.tsx", "pages/InvitePage.tsx"]
+    },
+    {
+      "name": "Dashboard",
+      "description": "Main dashboard with metrics.",
+      "files": ["pages/Dashboard.tsx", "components/AgencyDashboard.tsx"]
+    },
+    {
+      "name": "Pipeline",
+      "description": "Kanban board for managing sales pipeline.",
+      "files": ["pages/Pipeline.tsx", "components/DealModal.tsx"]
+    },
+    {
+      "name": "Quiz System",
+      "description": "Quiz builder, list and public quiz runner.",
+      "files": ["pages/QuizBuilder.tsx", "pages/QuizList.tsx", "pages/PublicQuiz.tsx", "components/QuizResponses.tsx"]
+    },
+    {
+      "name": "Agency Management",
+      "description": "Agency profile and team management.",
+      "files": ["pages/Agency.tsx", "context/AgencyContext.tsx"]
+    },
+    {
+      "name": "Billing & Plans",
+      "description": "Subscription plans and Stripe integration.",
+      "files": ["pages/Plans.tsx"]
+    },
+    {
+      "name": "Contacts & Contracts",
+      "description": "Management of contacts and contracts.",
+      "files": ["pages/Contacts.tsx", "pages/Contracts.tsx", "components/ContactModal.tsx", "components/ContactProfile.tsx", "components/ContractModal.tsx"]
+    },
+    {
+      "name": "Landing Page",
+      "description": "Public landing page.",
+      "files": ["pages/LandingPage.tsx"]
+    }
+  ]
+}

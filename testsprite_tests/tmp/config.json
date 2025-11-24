@@ -1,7 +1,18 @@
 {
   "status": "init",
+  "type": "backend",
   "scope": "codebase",
-  "type": "frontend",
-  "localEndpoint": "http://localhost:3000/",
-  "serverPort": 64695
+  "localEndpoint": "http://localhost:54321/",
+  "loginUser": "teste@teste.com",
+  "loginPassword": "teste123",
+  "executionArgs": {
+    "projectName": "CRM MARKETING",
+    "projectPath": "f:\\CRM MARKETING",
+    "testIds": [],
+    "additionalInstruction": "",
+    "envs": {
+      "API_KEY": "sk-user-J4Z34RGfuctS9tcYoLaBDlLgAPpG8UA3mL2GpBFX56a12oDqWwDdCeHAlaTRLu49UgucGYv13CM87iLOWj4JHi83VkJ6nz1Pp6CQJdx4QzXDrgL-_eWMQRc1ERNtalybdKo"
+    }
+  },
+  "proxy": "http://aec0eb99-0779-419a-bf70-81d4b74dc1f7:5V194BEKaJ09xybZrWyCcqtFj60iJjVW@tun.testsprite.com:8080"
 }

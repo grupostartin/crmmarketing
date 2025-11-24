@@ -1,0 +1,345 @@
+[
+  {
+    "id": "TC001",
+    "title": "User login success with valid credentials",
+    "description": "Verify that a user can successfully log in using valid username/email and password credentials.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the login page."
+      },
+      {
+        "type": "action",
+        "description": "Input valid username/email and password."
+      },
+      {
+        "type": "action",
+        "description": "Click the login button."
+      },
+      {
+        "type": "assertion",
+        "description": "Check that the user is authenticated and redirected to the dashboard."
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "User login failure with invalid credentials",
+    "description": "Verify that login fails and an appropriate error message is shown when entering invalid credentials.",
+    "category": "error handling",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the login page."
+      },
+      {
+        "type": "action",
+        "description": "Input invalid username/email and/or password."
+      },
+      {
+        "type": "action",
+        "description": "Click the login button."
+      },
+      {
+        "type": "assertion",
+        "description": "Check that login is rejected and proper error message is displayed."
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "Role-based access control enforcement",
+    "description": "Verify that users can only access routes and features permitted by their assigned roles.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login with a user account assigned a specific role."
+      },
+      {
+        "type": "action",
+        "description": "Attempt to access various routes and UI features."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify access is granted or denied correctly according to role permissions."
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "Agency owner creates agency profile and invites team members",
+    "description": "Verify that an agency owner can create a new agency profile and send team invitations with unique token links that enforce roles.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as an agency owner."
+      },
+      {
+        "type": "action",
+        "description": "Create a new agency profile."
+      },
+      {
+        "type": "action",
+        "description": "Invite team members via generated token invitation links assigning specific roles."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that team members receive unique token links and can join with assigned roles enforced."
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Dashboard displays accurate and updated KPIs",
+    "description": "Verify that the dashboard metrics and data visualizations reflect accurate and timely backend data.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login and navigate to the dashboard."
+      },
+      {
+        "type": "assertion",
+        "description": "Check that performance metrics and visualizations display correct data based on the current backend state."
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Kanban pipeline drag-and-drop functionality",
+    "description": "Verify that leads can be moved across pipeline stages using drag-and-drop and the updated state persists correctly.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login and navigate to the sales pipeline Kanban page."
+      },
+      {
+        "type": "action",
+        "description": "Drag a lead card from one pipeline stage to another."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm the lead is visually moved to the new stage and the change persists after page refresh."
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Interactive quiz creation, running, and response saving",
+    "description": "Verify marketing users can build quizzes, distribute them publicly, and that responses are captured and retrievable for analysis.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as marketing user and navigate to quiz builder."
+      },
+      {
+        "type": "action",
+        "description": "Create a new interactive quiz with various question types."
+      },
+      {
+        "type": "action",
+        "description": "Publish the quiz and access the public quiz runner page."
+      },
+      {
+        "type": "action",
+        "description": "Submit quiz responses as a public user."
+      },
+      {
+        "type": "action",
+        "description": "Go back to the quiz responses analysis page."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that submitted quiz responses are saved accurately and displayed in the analysis interface."
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "Contact and contract management functionality",
+    "description": "Verify that users can create, edit, view, and delete contacts and contracts while respecting role permissions.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login and navigate to contacts and contracts modules."
+      },
+      {
+        "type": "action",
+        "description": "Create new contacts and contracts using modal dialogs."
+      },
+      {
+        "type": "action",
+        "description": "Edit existing contacts and contracts."
+      },
+      {
+        "type": "action",
+        "description": "Delete contacts and contracts if permitted."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm that all operations persist correctly and respect the current user's role permissions."
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "Subscription plan upgrade and Stripe billing integration",
+    "description": "Verify that agency owners can upgrade or change subscription plans and that Stripe billing processes payments correctly, updating UI and billing status.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as agency owner and navigate to the subscription plans page."
+      },
+      {
+        "type": "action",
+        "description": "Select and confirm an upgrade or plan change."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that payment is processed successfully via Stripe and the UI updates to reflect new plan limits and billing status."
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "Agency invite token uniqueness and membership enforcement",
+    "description": "Verify that each invite token sent to new members is unique, that tokens can only be used once, and that membership roles are enforced upon acceptance.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Generate multiple invite tokens for team members."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify each token is unique and can be used only once."
+      },
+      {
+        "type": "action",
+        "description": "Accept an invitation using a token and check assigned role enforcement."
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "UI compliance with retro pixel art design and responsiveness",
+    "description": "Verify that the entire user interface matches the retro pixel art design specifications and is responsive across multiple device sizes.",
+    "category": "ui",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate through all major UI screens including landing page, dashboard, pipeline, quizzes, contacts, contracts, and plans pages."
+      },
+      {
+        "type": "assertion",
+        "description": "Check that visual elements conform to pixel art style, color scheme, font usage and design specs."
+      },
+      {
+        "type": "action",
+        "description": "Resize browser/window to different viewport sizes including mobile, tablet, and desktop."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify layouts adapt correctly and remain usable on all device sizes."
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Authentication required enforcement on protected routes",
+    "description": "Verify that users not logged in are redirected to the login page when trying to access protected routes.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Attempt to access protected pages like dashboard, pipeline, agency profile, and billing plans without authentication."
+      },
+      {
+        "type": "assertion",
+        "description": "Check redirection to login page and that no protected data is exposed."
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "Persistence of sales pipeline state after browser refresh",
+    "description": "Verify that pipeline state after drag-and-drop actions persists after a browser or page refresh.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Rearrange leads within the sales pipeline by drag-and-drop."
+      },
+      {
+        "type": "action",
+        "description": "Refresh the browser page."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm that the lead positions and stages remain as arranged before refresh."
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "Quiz response data accuracy under edge cases",
+    "description": "Verify that quiz responses are captured correctly including edge cases like empty answers, multiple selections, and invalid inputs.",
+    "category": "error handling",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Create and publish a quiz with questions supporting multiple choice and optional answers."
+      },
+      {
+        "type": "action",
+        "description": "Submit responses including skipping some questions, selecting multiple choices, and providing invalid data if allowed."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that all responses are saved accurately, with proper handling or validation of edge cases."
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "Team member role modification and permissions update",
+    "description": "Verify that agency owners can modify team members' roles and that permissions update accordingly in real-time.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as agency owner and navigate to team management."
+      },
+      {
+        "type": "action",
+        "description": "Change a team member's role."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that the team member's permissions are updated accordingly and enforced immediately."
+      }
+    ]
+  }
+]

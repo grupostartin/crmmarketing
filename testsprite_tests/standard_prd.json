@@ -1,0 +1,124 @@
+{
+  "meta": {
+    "project": "StartinOS CRM",
+    "date": "2025-11-19",
+    "prepared_by": "Software Development Manager"
+  },
+  "product_overview": "StartinOS CRM is a SaaS product designed for digital marketing agencies, providing a centralized platform to manage clients, sales pipelines, quizzes for lead generation, agency teams, contracts, and subscription billing. It features a unique retro/pixel art aesthetic for an engaging user experience.",
+  "core_goals": [
+    "Centralize agency operations including lead, contract, and team management",
+    "Increase engagement through interactive quizzes for lead capture",
+    "Provide a scalable subscription model with tiered plans integrated with Stripe",
+    "Deliver a distinctive visual identity with a retro pixel art UI for differentiation"
+  ],
+  "key_features": [
+    "User authentication with role-based access control",
+    "Agency profile and team management with secure invite links",
+    "Dashboard with performance metrics and data visualizations",
+    "Kanban-style sales pipeline management with drag-and-drop",
+    "Interactive quiz builder and public quiz runner for marketing lead generation",
+    "Contact and contract management modules",
+    "Subscription plan management with Stripe billing integration",
+    "Public landing page for product marketing"
+  ],
+  "user_flow_summary": [
+    "User visits landing page, signs up or logs in with secure authentication and role-based access",
+    "Agency owners create and manage agency profile, invite team members via token links, and assign roles",
+    "Users access dashboard to view KPIs, navigate to CRM pipeline, contacts, contracts, or quizzes",
+    "Sales teams manage leads through a drag-and-drop Kanban pipeline interface",
+    "Marketing teams build quizzes to capture leads, distribute them publicly, and analyze responses",
+    "Agency manages contracts and team permissions according to roles",
+    "Owners upgrade or change subscription plans, with UI updates that reflect plan limits and billing status"
+  ],
+  "validation_criteria": [
+    "All routes enforce authentication and role-based permissions properly",
+    "Quiz responses are saved and retrievable for analysis",
+    "Drag-and-drop functionality in pipeline works smoothly and persists state",
+    "Stripe integration processes subscription payments and updates correctly",
+    "Agency invites send unique tokens and enforce membership roles",
+    "UI matches the retro pixel art design specifications and responsiveness requirements",
+    "Dashboard metrics display accurate and timely data reflecting backend state"
+  ],
+  "code_summary": {
+    "tech_stack": [
+      "TypeScript",
+      "React",
+      "Vite",
+      "Supabase",
+      "Tailwind CSS",
+      "Stripe"
+    ],
+    "features": [
+      {
+        "name": "Authentication",
+        "description": "User login, signup, and protection mechanisms.",
+        "files": [
+          "pages/Login.tsx",
+          "pages/SignUp.tsx",
+          "components/AuthLayout.tsx",
+          "components/ProtectedRoute.tsx",
+          "pages/InvitePage.tsx"
+        ]
+      },
+      {
+        "name": "Dashboard",
+        "description": "Main dashboard with metrics.",
+        "files": [
+          "pages/Dashboard.tsx",
+          "components/AgencyDashboard.tsx"
+        ]
+      },
+      {
+        "name": "Pipeline",
+        "description": "Kanban board for managing sales pipeline.",
+        "files": [
+          "pages/Pipeline.tsx",
+          "components/DealModal.tsx"
+        ]
+      },
+      {
+        "name": "Quiz System",
+        "description": "Quiz builder, list and public quiz runner.",
+        "files": [
+          "pages/QuizBuilder.tsx",
+          "pages/QuizList.tsx",
+          "pages/PublicQuiz.tsx",
+          "components/QuizResponses.tsx"
+        ]
+      },
+      {
+        "name": "Agency Management",
+        "description": "Agency profile and team management.",
+        "files": [
+          "pages/Agency.tsx",
+          "context/AgencyContext.tsx"
+        ]
+      },
+      {
+        "name": "Billing & Plans",
+        "description": "Subscription plans and Stripe integration.",
+        "files": [
+          "pages/Plans.tsx"
+        ]
+      },
+      {
+        "name": "Contacts & Contracts",
+        "description": "Management of contacts and contracts.",
+        "files": [
+          "pages/Contacts.tsx",
+          "pages/Contracts.tsx",
+          "components/ContactModal.tsx",
+          "components/ContactProfile.tsx",
+          "components/ContractModal.tsx"
+        ]
+      },
+      {
+        "name": "Landing Page",
+        "description": "Public landing page.",
+        "files": [
+          "pages/LandingPage.tsx"
+        ]
+      }
+    ]
+  }
+}

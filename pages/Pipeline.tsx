@@ -2,20 +2,18 @@ import React, { useState, useEffect } from 'react';
 import {
   DndContext,
   closestCenter,
-  KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
-  DragOverlay,
-  defaultDropAnimationSideEffects,
-  DragStartEvent,
-  DragOverEvent,
   DragEndEvent,
+  DragStartEvent,
+  DragOverlay,
+  UniqueIdentifier,
+  useDroppable,
+  defaultDropAnimationSideEffects,
 } from '@dnd-kit/core';
 import {
-  arrayMove,
   SortableContext,
-  sortableKeyboardCoordinates,
   verticalListSortingStrategy,
   useSortable,
 } from '@dnd-kit/sortable';
@@ -32,13 +30,13 @@ interface Deal {
   stage: string;
   contact: {
     name: string;
-  };
+  } | null;
   created_at: string;
 }
 
 const STAGES = ['Novos Leads', 'Contatado', 'Qualificado', 'Proposta', 'Negociação', 'Fechado'];
 
-const SortableItem = ({ deal, onDelete }: { deal: Deal; onDelete: (dealId: string) => void }) => {
+const DealCard = ({ deal, onDelete }: { deal: Deal; onDelete: (dealId: string) => void; key?: React.Key }) => {
   const {
     attributes,
     listeners,
@@ -46,43 +44,36 @@ const SortableItem = ({ deal, onDelete }: { deal: Deal; onDelete: (dealId: strin
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: deal.id, data: { type: 'Deal', deal } });
+  } = useSortable({ id: deal.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
+    transition: transition || 'transform 200ms ease',
+    opacity: isDragging ? 0 : 1,
+    scale: isDragging ? '0.95' : '1',
   };
-
-  if (isDragging) {
-    return (
-      <div
-        ref={setNodeRef}
-        style={style}
-        className="bg-retro-surface border-2 border-retro-cyan p-4 shadow-pixel opacity-50 h-[120px]"
-      />
-    );
-  }
 
   return (
     <div
       ref={setNodeRef}
       style={style}
       {...attributes}
-      className="bg-retro-surface border-2 border-black p-4 shadow-pixel hover:border-retro-cyan group relative"
+      {...listeners}
+      className={`bg-retro-surface border-2 border-black p-4 shadow-pixel hover:border-retro-cyan hover:shadow-[6px_6px_0_0_#13ecc8] hover:scale-[1.02] group relative cursor-grab active:cursor-grabbing mb-2 transition-all duration-200 ${
+        isDragging ? 'z-50' : 'z-0'
+      }`}
     >
-      <div {...listeners} className="cursor-grab active:cursor-grabbing">
-        <h3 className="font-header text-sm text-retro-fg mb-2">{deal.title}</h3>
-        <div className="space-y-1">
-          <p className="text-retro-comment text-xs flex items-center gap-1">
-            <User size={12} /> {deal.contact?.name}
-          </p>
-          <p className="text-retro-green text-xs flex items-center gap-1 font-bold">
-            <DollarSign size={12} /> {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(deal.value)}
-          </p>
-          <p className="text-retro-comment/60 text-[10px] flex items-center gap-1 pt-2 border-t border-black/20 mt-2">
-            <Calendar size={10} /> {new Date(deal.created_at).toLocaleDateString('pt-BR')}
-          </p>
-        </div>
+      <h3 className="font-header text-sm text-retro-fg mb-2">{deal.title}</h3>
+      <div className="space-y-1">
+        <p className="text-retro-comment text-xs flex items-center gap-1">
+          <User size={12} /> {deal.contact?.name || 'Sem contato'}
+        </p>
+        <p className="text-retro-green text-xs flex items-center gap-1 font-bold">
+          <DollarSign size={12} /> {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(deal.value)}
+        </p>
+        <p className="text-retro-comment/60 text-[10px] flex items-center gap-1 pt-2 border-t border-black/20 mt-2">
+          <Calendar size={10} /> {new Date(deal.created_at).toLocaleDateString('pt-BR')}
+        </p>
       </div>
       <button
         onClick={(e) => {
@@ -101,18 +92,15 @@ const SortableItem = ({ deal, onDelete }: { deal: Deal; onDelete: (dealId: strin
 const Pipeline = () => {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const [activeDeal, setActiveDeal] = useState<Deal | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
+  const [activeDeal, setActiveDeal] = useState<Deal | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 5, // Prevent accidental drags
+        distance: 8,
       },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
     })
   );
 
@@ -121,15 +109,26 @@ const Pipeline = () => {
   }, []);
 
   const fetchDeals = async () => {
-    const { data, error } = await supabase
-      .from('deals')
-      .select(`
-                *,
-                contact:contacts(name)
-            `)
-      .order('created_at', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('deals')
+        .select(`
+          *,
+          contact:contacts(name)
+        `)
+        .order('created_at', { ascending: false });
 
-    if (data) setDeals(data);
+      if (error) {
+        console.error('Error fetching deals:', error);
+        return;
+      }
+
+      if (data) {
+        setDeals(data);
+      }
+    } catch (error) {
+      console.error('Error fetching deals:', error);
+    }
   };
 
   const handleDeleteDeal = async (dealId: string) => {
@@ -150,97 +149,52 @@ const Pipeline = () => {
   };
 
   const onDragStart = (event: DragStartEvent) => {
-    const { active } = event;
-    setActiveId(active.id as string);
-    setActiveDeal(active.data.current?.deal || null);
-  };
-
-  const onDragOver = (event: DragOverEvent) => {
-    const { active, over } = event;
-    if (!over) return;
-
-    const activeId = active.id;
-    const overId = over.id;
-
-    if (activeId === overId) return;
-
-    const isActiveADeal = active.data.current?.type === 'Deal';
-    const isOverADeal = over.data.current?.type === 'Deal';
-
-    if (!isActiveADeal) return;
-
-    // Dropping a Deal over another Deal
-    if (isActiveADeal && isOverADeal) {
-      setDeals((deals) => {
-        const activeIndex = deals.findIndex((t) => t.id === activeId);
-        const overIndex = deals.findIndex((t) => t.id === overId);
-
-        if (deals[activeIndex].stage !== deals[overIndex].stage) {
-          deals[activeIndex].stage = deals[overIndex].stage;
-          return arrayMove(deals, activeIndex, overIndex - 1);
-        }
-
-        return arrayMove(deals, activeIndex, overIndex);
-      });
-    }
-
-    const isOverAColumn = over.data.current?.type === 'Column';
-
-    // Dropping a Deal over a Column
-    if (isActiveADeal && isOverAColumn) {
-      setDeals((deals) => {
-        const activeIndex = deals.findIndex((t) => t.id === activeId);
-        deals[activeIndex].stage = over.id as string;
-        return arrayMove(deals, activeIndex, activeIndex);
-      });
-    }
+    setActiveId(event.active.id);
+    const deal = deals.find(d => d.id === event.active.id);
+    setActiveDeal(deal || null);
   };
 
   const onDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
     setActiveId(null);
     setActiveDeal(null);
 
-    const { active, over } = event;
     if (!over) return;
 
-    const activeId = active.id as string;
-    const overId = over.id as string;
+    const dealId = active.id as string;
+    const newStage = over.id as string;
 
-    const activeDeal = deals.find(d => d.id === activeId);
-    const overColumn = STAGES.includes(overId) ? overId : null;
-    const overDeal = deals.find(d => d.id === overId);
+    // Check if dropped on a valid stage
+    if (!STAGES.includes(newStage)) return;
 
-    let newStage = activeDeal?.stage;
+    const deal = deals.find(d => d.id === dealId);
+    if (!deal || deal.stage === newStage) return;
 
-    if (overColumn) {
-      newStage = overColumn;
-    } else if (overDeal) {
-      newStage = overDeal.stage;
-    }
+    // Optimistic update
+    setDeals(prevDeals =>
+      prevDeals.map(d =>
+        d.id === dealId ? { ...d, stage: newStage } : d
+      )
+    );
 
-    if (activeDeal && newStage && activeDeal.stage !== newStage) {
-      // Optimistic update already happened in onDragOver for visual smoothness
-      // Now persist to Supabase
-      try {
-        await supabase
-          .from('deals')
-          .update({ stage: newStage })
-          .eq('id', activeId);
-      } catch (error) {
-        console.error('Error updating deal stage:', error);
-        fetchDeals(); // Revert on error
+    // Persist to database
+    try {
+      const { error } = await supabase
+        .from('deals')
+        .update({ stage: newStage })
+        .eq('id', dealId);
+
+      if (error) {
+        console.error('Error updating deal:', error);
+        alert(`Erro ao atualizar: ${error.message}`);
+        // Revert on error
+        await fetchDeals();
       }
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      alert('Erro inesperado ao atualizar o negócio');
+      await fetchDeals();
     }
-  };
-
-  const dropAnimation = {
-    sideEffects: defaultDropAnimationSideEffects({
-      styles: {
-        active: {
-          opacity: '0.5',
-        },
-      },
-    }),
   };
 
   return (
@@ -259,7 +213,6 @@ const Pipeline = () => {
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragStart={onDragStart}
-        onDragOver={onDragOver}
         onDragEnd={onDragEnd}
       >
         <div className="grid grid-cols-6 gap-2 h-full min-w-0">
@@ -283,35 +236,45 @@ const Pipeline = () => {
                 </div>
               </div>
 
-              <SortableContext
-                id={stage}
-                items={deals.filter(d => d.stage === stage).map(d => d.id)}
-                strategy={verticalListSortingStrategy}
-              >
-                <div
-                  className="flex-1 p-2 space-y-2 overflow-y-auto min-h-[100px] scrollbar-thin"
+              <DroppableColumn id={stage}>
+                <SortableContext
+                  items={deals.filter(d => d.stage === stage).map(d => d.id)}
+                  strategy={verticalListSortingStrategy}
                 >
-                  {/* We need a droppable ref for the column itself to handle empty states */}
-                  <ColumnDroppable id={stage}>
+                  <div className="flex-1 p-2 overflow-y-auto min-h-[150px] scrollbar-thin">
                     {deals
                       .filter((deal) => deal.stage === stage)
                       .map((deal) => (
-                        <SortableItem key={deal.id} deal={deal} onDelete={setDeleteConfirm} />
+                        <DealCard 
+                          key={deal.id} 
+                          deal={deal} 
+                          onDelete={setDeleteConfirm as (dealId: string) => void} 
+                        />
                       ))}
-                  </ColumnDroppable>
-                </div>
-              </SortableContext>
+                  </div>
+                </SortableContext>
+              </DroppableColumn>
             </div>
           ))}
         </div>
 
-        <DragOverlay dropAnimation={dropAnimation}>
+        <DragOverlay
+          dropAnimation={{
+            sideEffects: defaultDropAnimationSideEffects({
+              styles: {
+                active: {
+                  opacity: '0.4',
+                },
+              },
+            }),
+          }}
+        >
           {activeDeal ? (
-            <div className="bg-retro-surface border-2 border-retro-cyan p-4 shadow-pixel rotate-3 cursor-grabbing w-[280px]">
+            <div className="bg-retro-surface border-4 border-retro-cyan p-4 shadow-[8px_8px_0_0_#13ecc8] rotate-3 scale-105 cursor-grabbing">
               <h3 className="font-header text-sm text-retro-fg mb-2">{activeDeal.title}</h3>
               <div className="space-y-1">
                 <p className="text-retro-comment text-xs flex items-center gap-1">
-                  <User size={12} /> {activeDeal.contact?.name}
+                  <User size={12} /> {activeDeal.contact?.name || 'Sem contato'}
                 </p>
                 <p className="text-retro-green text-xs flex items-center gap-1 font-bold">
                   <DollarSign size={12} /> {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(activeDeal.value)}
@@ -358,16 +321,18 @@ const Pipeline = () => {
 };
 
 // Helper component to make the column droppable even when empty
-import { useDroppable } from '@dnd-kit/core';
-
-const ColumnDroppable = ({ id, children }: { id: string, children: React.ReactNode }) => {
-  const { setNodeRef } = useDroppable({
+const DroppableColumn = ({ id, children }: { id: string, children: React.ReactNode }) => {
+  const { setNodeRef, isOver } = useDroppable({
     id: id,
-    data: { type: 'Column' }
   });
 
   return (
-    <div ref={setNodeRef} className="h-full min-h-[150px]">
+    <div 
+      ref={setNodeRef} 
+      className={`flex-1 transition-all duration-200 ${
+        isOver ? 'bg-retro-cyan/10 ring-2 ring-retro-cyan ring-inset animate-pulse' : ''
+      }`}
+    >
       {children}
     </div>
   );

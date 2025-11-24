@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import logo from '../assets/logo.png';
 import { 
   BarChart3, 
   CheckSquare, 
@@ -317,19 +318,21 @@ const Navbar = () => {
     <nav className="sticky top-0 z-50 bg-bgDark/90 backdrop-blur-md border-b-4 border-black py-4 px-6 md:px-12">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary border-2 border-black shadow-pixel-sm"></div>
+          <img src={logo} alt="StartinOS Logo" className="w-10 h-10 object-contain shadow-pixel-sm" />
           <div className="flex flex-col">
             <span className="font-display text-lg text-white">StartinOS</span>
-            <span className="font-body text-gray-400 text-sm leading-none">Marketing CRM</span>
+            <span className="font-body text-gray-400 text-sm leading-none">Powered by Grupo Startin</span>
           </div>
         </div>
 
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-8 font-body text-xl">
-          <a href="#features" className="text-white hover:text-primary hover:underline decoration-2 underline-offset-4 transition-colors">Funcionalidades</a>
-          <a href="#how-it-works" className="text-white hover:text-primary hover:underline decoration-2 underline-offset-4 transition-colors">Como Funciona</a>
-          <a href="#pricing" className="text-white hover:text-primary hover:underline decoration-2 underline-offset-4 transition-colors">Planos</a>
+          <a href="#" className="text-white hover:text-primary hover:scale-110 transition-all duration-200">Início</a>
+          <a href="#features" className="text-white hover:text-primary hover:scale-110 transition-all duration-200">Funcionalidades</a>
+          <a href="#how-it-works" className="text-white hover:text-primary hover:scale-110 transition-all duration-200">Como Funciona</a>
+          <a href="#about" className="text-white hover:text-primary hover:scale-110 transition-all duration-200">Quem Somos</a>
+          <a href="#pricing" className="text-white hover:text-primary hover:scale-110 transition-all duration-200">Planos</a>
           <PixelButton className="text-lg py-1 px-4" onClick={() => window.location.href = '/login'}>Login</PixelButton>
         </div>
 
@@ -344,8 +347,10 @@ const Navbar = () => {
       {/* Mobile Menu */}
       {isOpen && (
         <div className="md:hidden absolute top-full left-0 w-full bg-cardDark border-b-4 border-black p-6 flex flex-col gap-4 font-body text-2xl shadow-pixel">
+          <a href="#" onClick={() => setIsOpen(false)} className="text-white hover:text-primary">Início</a>
           <a href="#features" onClick={() => setIsOpen(false)} className="text-white hover:text-primary">Funcionalidades</a>
           <a href="#how-it-works" onClick={() => setIsOpen(false)} className="text-white hover:text-primary">Como Funciona</a>
+          <a href="#about" onClick={() => setIsOpen(false)} className="text-white hover:text-primary">Quem Somos</a>
           <a href="#pricing" onClick={() => setIsOpen(false)} className="text-white hover:text-primary">Planos</a>
           <PixelButton className="w-full" onClick={() => window.location.href = '/login'}>Login</PixelButton>
         </div>
@@ -684,6 +689,73 @@ const HowItWorks = () => {
 };
 
 
+const AboutUs = () => {
+  return (
+    <section id="about" className="bg-bgDark py-24 border-t-4 border-black relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <div className="flex flex-col md:flex-row gap-12 items-center">
+          <div className="w-full md:w-1/2">
+            <RevealOnScroll direction="right">
+              <div className="bg-cardDark border-4 border-black shadow-pixel p-8 relative transform rotate-1 hover:rotate-0 transition-transform duration-300">
+                 <div className="absolute -top-4 -left-4 bg-secondary text-white font-display px-4 py-1 border-2 border-black shadow-pixel-sm transform -rotate-3">
+                    NOSSA MISSÃO
+                 </div>
+                 <p className="font-body text-xl text-gray-300 leading-relaxed mb-6">
+                   A <span className="text-primary font-bold">StartinOS</span> nasceu da frustração de usar ferramentas complexas demais para problemas simples.
+                 </p>
+                 <p className="font-body text-xl text-gray-300 leading-relaxed mb-6">
+                   Acreditamos que agências de marketing precisam de agilidade, não de burocracia. Nosso objetivo é fornecer um sistema operacional completo, divertido e eficiente.
+                 </p>
+                 <p className="font-body text-xl text-gray-300 leading-relaxed">
+                   Combinamos a estética retro dos anos 80 com a tecnologia mais moderna de automação e dados.
+                 </p>
+              </div>
+            </RevealOnScroll>
+          </div>
+          
+          <div className="w-full md:w-1/2">
+             <RevealOnScroll direction="left">
+                <h2 className="font-display text-3xl md:text-5xl text-white mb-6">
+                  Quem Somos
+                </h2>
+                <div className="space-y-6">
+                   <div className="flex items-start gap-4 group">
+                      <div className="bg-primary/20 p-3 border-2 border-primary group-hover:bg-primary/30 transition-colors">
+                         <Users size={24} className="text-primary" />
+                      </div>
+                      <div>
+                         <h3 className="font-display text-xl text-white mb-1">Feito por Especialistas</h3>
+                         <p className="font-body text-gray-400">Desenvolvido por quem vive o dia a dia de agências de alta performance.</p>
+                      </div>
+                   </div>
+                   <div className="flex items-start gap-4 group">
+                      <div className="bg-secondary/20 p-3 border-2 border-secondary group-hover:bg-secondary/30 transition-colors">
+                         <Zap size={24} className="text-secondary" />
+                      </div>
+                      <div>
+                         <h3 className="font-display text-xl text-white mb-1">Foco em Resultados</h3>
+                         <p className="font-body text-gray-400">Cada feature existe para aumentar sua conversão ou reduzir seu tempo operacional.</p>
+                      </div>
+                   </div>
+                   <div className="flex items-start gap-4 group">
+                      <div className="bg-accentPink/20 p-3 border-2 border-accentPink group-hover:bg-accentPink/30 transition-colors">
+                         <Kanban size={24} className="text-accentPink" />
+                      </div>
+                      <div>
+                         <h3 className="font-display text-xl text-white mb-1">Design Único</h3>
+                         <p className="font-body text-gray-400">Uma experiência visual que torna o trabalho menos entediante e mais produtivo.</p>
+                      </div>
+                   </div>
+                </div>
+             </RevealOnScroll>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+
 const Pricing = () => {
   return (
     <section id="pricing" className="bg-bgDark py-24 border-t-4 border-black relative overflow-hidden">
@@ -746,23 +818,67 @@ const Pricing = () => {
 
 const Footer = () => {
   return (
-    <footer className="bg-black py-12 border-t-4 border-gray-800">
-      <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
-        
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gray-800 border-2 border-gray-600 hover:bg-gray-700 transition-colors"></div>
-          <span className="font-display text-gray-400">StartinOS &copy; 2025</span>
+    <footer className="bg-black py-16 border-t-4 border-gray-800">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+          
+          {/* Brand */}
+          <div className="col-span-1 md:col-span-1 space-y-4">
+            <div className="flex items-center gap-3">
+              <img src={logo} alt="StartinOS Logo" className="w-10 h-10 object-contain" />
+              <span className="font-display text-xl text-white">StartinOS</span>
+            </div>
+            <p className="font-body text-gray-500 text-lg leading-relaxed">
+              O sistema operacional definitivo para agências de marketing digital.
+            </p>
+          </div>
+
+          {/* Links */}
+          <div>
+            <h4 className="font-display text-white text-lg mb-4">Produto</h4>
+            <ul className="space-y-2 font-body text-gray-500">
+              <li><a href="#features" className="hover:text-primary transition-colors hover:translate-x-1 inline-block duration-200">Funcionalidades</a></li>
+              <li><a href="#how-it-works" className="hover:text-primary transition-colors hover:translate-x-1 inline-block duration-200">Como Funciona</a></li>
+              <li><a href="#pricing" className="hover:text-primary transition-colors hover:translate-x-1 inline-block duration-200">Planos</a></li>
+              <li><a href="/login" className="hover:text-primary transition-colors hover:translate-x-1 inline-block duration-200">Login</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-display text-white text-lg mb-4">Empresa</h4>
+            <ul className="space-y-2 font-body text-gray-500">
+              <li><a href="#about" className="hover:text-primary transition-colors hover:translate-x-1 inline-block duration-200">Quem Somos</a></li>
+              <li><a href="/privacy" className="hover:text-primary transition-colors hover:translate-x-1 inline-block duration-200">Política de Privacidade</a></li>
+              <li><a href="/terms" className="hover:text-primary transition-colors hover:translate-x-1 inline-block duration-200">Termos de Uso</a></li>
+            </ul>
+          </div>
+
+          <div>
+             <h4 className="font-display text-white text-lg mb-4">Social</h4>
+             <div className="flex gap-4">
+               <a href="#" className="w-10 h-10 border-2 border-gray-700 flex items-center justify-center text-gray-500 hover:border-primary hover:text-primary hover:shadow-[4px_4px_0px_0px_#13ecc8] transition-all duration-200 bg-bgDark">
+                 <span className="font-bold">X</span>
+               </a>
+               <a href="#" className="w-10 h-10 border-2 border-gray-700 flex items-center justify-center text-gray-500 hover:border-secondary hover:text-secondary hover:shadow-[4px_4px_0px_0px_#0066ff] transition-all duration-200 bg-bgDark">
+                 <span className="font-bold">in</span>
+               </a>
+               <a href="#" className="w-10 h-10 border-2 border-gray-700 flex items-center justify-center text-gray-500 hover:border-accentPink hover:text-accentPink hover:shadow-[4px_4px_0px_0px_#ff00ff] transition-all duration-200 bg-bgDark">
+                 <span className="font-bold">IG</span>
+               </a>
+             </div>
+          </div>
+
         </div>
 
-
-        <div className="flex gap-8 font-body text-xl text-gray-500">
-          <a href="#" className="hover:text-primary transition-colors hover:scale-105 inline-block">Termos</a>
-          <a href="#" className="hover:text-primary transition-colors hover:scale-105 inline-block">Privacidade</a>
-          <a href="#" className="hover:text-primary transition-colors hover:scale-105 inline-block">Suporte</a>
-          <a href="#" className="hover:text-primary transition-colors hover:scale-105 inline-block">Twitter</a>
+        <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="font-body text-gray-600 text-sm">
+            &copy; 2025 StartinOS. Feito com ⚡ e pixels no Brasil.
+          </p>
+          <p className="font-body text-gray-600 text-sm flex items-center gap-2">
+            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+            Todos os sistemas operacionais
+          </p>
         </div>
-
-
       </div>
     </footer>
   );
@@ -776,6 +892,7 @@ const LandingPage = () => {
       <Hero />
       <Features />
       <HowItWorks />
+      <AboutUs />
       <Pricing />
       <Footer />
       <FloatingWhatsAppButton />

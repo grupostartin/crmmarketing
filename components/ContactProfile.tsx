@@ -174,8 +174,17 @@ const ContactProfile: React.FC<ContactProfileProps> = ({ isOpen, onClose, contac
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <div className={`inline-block px-4 py-2 border-2 border-black font-bold ${getStatusColor(contact.status)}`}>
-                                        {contact.status}
+                                    <div className={`inline-block px-4 py-2 border-2 border-black font-bold ${
+                                        deals.length > 0 
+                                            ? deals[0].stage === 'Fechado' ? 'bg-retro-green' :
+                                              deals[0].stage === 'Negociação' ? 'bg-retro-orange' :
+                                              deals[0].stage === 'Proposta' ? 'bg-retro-yellow' :
+                                              deals[0].stage === 'Qualificado' ? 'bg-retro-pink' :
+                                              deals[0].stage === 'Contatado' ? 'bg-retro-purple' :
+                                              'bg-retro-cyan'
+                                            : getStatusColor(contact.status)
+                                    }`}>
+                                        {deals.length > 0 ? deals[0].stage : contact.status}
                                     </div>
                                     <div className="mt-2 text-2xl font-bold">{contact.score}</div>
                                     <div className="text-sm text-retro-comment">Score</div>
