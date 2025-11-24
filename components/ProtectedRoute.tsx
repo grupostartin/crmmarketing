@@ -8,6 +8,12 @@ const ProtectedRoute = () => {
 
     useEffect(() => {
         const checkAuth = async () => {
+            if (!supabase) {
+                setAuthenticated(false);
+                setLoading(false);
+                return;
+            }
+
             const { data: { session } } = await supabase.auth.getSession();
             setAuthenticated(!!session);
             setLoading(false);
@@ -15,12 +21,14 @@ const ProtectedRoute = () => {
 
         checkAuth();
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setAuthenticated(!!session);
-            setLoading(false);
-        });
+        if (supabase) {
+            const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+                setAuthenticated(!!session);
+                setLoading(false);
+            });
 
-        return () => subscription.unsubscribe();
+            return () => subscription.unsubscribe();
+        }
     }, []);
 
     if (loading) {

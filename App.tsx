@@ -69,7 +69,9 @@ const Header = () => {
   const { profileImage } = useTheme();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    if (supabase) {
+      await supabase.auth.signOut();
+    }
   };
 
   return (

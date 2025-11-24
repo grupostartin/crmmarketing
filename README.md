@@ -143,6 +143,25 @@ O projeto utiliza as seguintes tabelas no Supabase:
 - Certifique-se de que o projeto Supabase está ativo
 - Verifique se as políticas RLS estão configuradas corretamente
 
+### Erro "Failed to fetch" no deploy
+
+Este erro geralmente ocorre quando as variáveis de ambiente não estão configuradas na plataforma de hospedagem:
+
+**Para Vercel:**
+1. Vá em Settings > Environment Variables
+2. Adicione `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`
+3. Faça um novo deploy
+
+**Para Netlify:**
+1. Vá em Site settings > Environment variables
+2. Adicione `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`
+3. Faça um novo deploy
+
+**Para outras plataformas:**
+- Configure as variáveis de ambiente na seção de configurações do seu projeto
+- Certifique-se de que as variáveis começam com `VITE_` para serem incluídas no build
+- Após configurar, faça um novo build e deploy
+
 ## 📝 Scripts Disponíveis
 
 - `npm run dev` - Inicia o servidor de desenvolvimento

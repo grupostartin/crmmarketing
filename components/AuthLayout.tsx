@@ -1,4 +1,5 @@
 import React from 'react';
+import EnvWarning from './EnvWarning';
 
 interface AuthLayoutProps {
     children: React.ReactNode;
@@ -20,6 +21,10 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitle }) =>
                     <div className="inline-block w-12 h-12 bg-retro-cyan border-2 border-black shadow-pixel-sm mb-4"></div>
                     <h1 className="font-header text-2xl text-retro-pink mb-2 uppercase tracking-wide">{title}</h1>
                     {subtitle && <p className="text-retro-comment text-lg">{subtitle}</p>}
+                </div>
+
+                <div className="mb-4">
+                    <EnvWarning />
                 </div>
 
                 {children}

@@ -17,6 +17,11 @@ const Login = () => {
         setError(null);
 
         try {
+            // Verificar se Supabase está configurado
+            if (!supabase) {
+                throw new Error('Supabase não está configurado. Verifique as variáveis de ambiente.');
+            }
+
             const { error } = await supabase.auth.signInWithPassword({
                 email,
                 password,
@@ -26,7 +31,18 @@ const Login = () => {
 
             navigate('/');
         } catch (err: any) {
-            setError(err.message || 'Erro ao fazer login');
+            // Melhorar mensagens de erro
+            let errorMessage = 'Erro ao fazer login';
+            
+            if (err.message?.includes('Supabase não está configurado')) {
+                errorMessage = 'Erro de configuração: Variáveis de ambiente do Supabase não estão configuradas.';
+            } else if (err.message?.includes('Failed to fetch') || err.message?.includes('ERR_NAME_NOT_RESOLVED')) {
+                errorMessage = 'Erro de conexão: Não foi possível conectar ao servidor. Verifique as configurações do Supabase.';
+            } else if (err.message) {
+                errorMessage = err.message;
+            }
+            
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
