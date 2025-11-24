@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Trello, CheckSquare, FileText, Users, Settings as SettingsIcon, Search, Bell, LogOut } from 'lucide-react';
+import { LayoutDashboard, Trello, CheckSquare, FileText, Users, Settings as SettingsIcon, Search, Bell, LogOut, Building2 } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import Pipeline from './pages/Pipeline';
 import QuizBuilder from './pages/QuizBuilder';
@@ -9,6 +9,7 @@ import PublicQuiz from './pages/PublicQuiz';
 import Contracts from './pages/Contracts';
 import Contacts from './pages/Contacts';
 import Settings from './pages/Settings';
+import Agency from './pages/Agency';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import AuthLayout from './components/AuthLayout';
@@ -16,6 +17,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import EnvWarning from './components/EnvWarning';
 import { supabase } from './lib/supabase';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { AgencyProvider } from './context/AgencyContext';
 
 // --- Components ---
 
@@ -53,6 +55,7 @@ const Sidebar = () => {
         <SidebarItem to="/quiz" icon={CheckSquare} label="Quizzes" active={location.pathname === '/quiz'} />
         <SidebarItem to="/contracts" icon={FileText} label="Contratos" active={location.pathname === '/contracts'} />
         <SidebarItem to="/contacts" icon={Users} label="Contatos" active={location.pathname === '/contacts'} />
+        <SidebarItem to="/agency" icon={Building2} label="Agência" active={location.pathname === '/agency'} />
       </nav>
 
       <div className="p-4 border-t-4 border-black mt-auto">
@@ -127,25 +130,28 @@ const MainLayout = () => {
 function App() {
   return (
     <ThemeProvider>
-      <Router>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/quiz/public/:id" element={<PublicQuiz />} />
+      <AgencyProvider>
+        <Router>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/quiz/public/:id" element={<PublicQuiz />} />
 
-          <Route element={<ProtectedRoute />}>
-            <Route element={<MainLayout />}>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/pipeline" element={<Pipeline />} />
-              <Route path="/quiz" element={<QuizList />} />
-              <Route path="/quiz/builder/:id?" element={<QuizBuilder />} />
-              <Route path="/contracts" element={<Contracts />} />
-              <Route path="/contacts" element={<Contacts />} />
-              <Route path="/settings" element={<Settings />} />
+            <Route element={<ProtectedRoute />}>
+              <Route element={<MainLayout />}>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/pipeline" element={<Pipeline />} />
+                <Route path="/quiz" element={<QuizList />} />
+                <Route path="/quiz/builder/:id?" element={<QuizBuilder />} />
+                <Route path="/contracts" element={<Contracts />} />
+                <Route path="/contacts" element={<Contacts />} />
+                <Route path="/agency" element={<Agency />} />
+                <Route path="/settings" element={<Settings />} />
+              </Route>
             </Route>
-          </Route>
-        </Routes>
-      </Router>
+          </Routes>
+        </Router>
+      </AgencyProvider>
     </ThemeProvider>
   );
 }

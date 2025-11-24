@@ -43,7 +43,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                     setThemeMode(data.theme_mode);
                     setThemeStyle(data.theme_style);
                     setProfileImage(data.avatar_url);
-                    setAgencyName(data.agency_name || 'AgencyFlow');
+                    // Não carregar agency_name do perfil - será gerenciado pelo sistema de agências
                     localStorage.setItem('themeMode', data.theme_mode);
                     localStorage.setItem('themeStyle', data.theme_style);
                 }
@@ -78,7 +78,6 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                         theme_mode: themeMode,
                         theme_style: themeStyle,
                         avatar_url: profileImage,
-                        agency_name: agencyName,
                         updated_at: new Date().toISOString()
                     });
                 }
@@ -97,7 +96,6 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 theme_mode: themeMode,
                 theme_style: themeStyle,
                 avatar_url: profileImage,
-                agency_name: agencyName,
                 updated_at: new Date().toISOString()
             });
 

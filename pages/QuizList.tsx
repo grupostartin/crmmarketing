@@ -25,14 +25,11 @@ const QuizList = () => {
 
     const fetchQuizzes = async () => {
         try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return;
-
-            // Buscar quizzes
+            // RLS já filtra por agency_id automaticamente
+            // Não precisamos filtrar por user_id
             const { data: quizzesData, error: quizzesError } = await supabase
                 .from('quizzes')
                 .select('*')
-                .eq('user_id', user.id)
                 .order('created_at', { ascending: false });
 
             if (quizzesError) throw quizzesError;

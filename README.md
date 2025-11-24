@@ -54,11 +54,40 @@ Sistema de CRM (Customer Relationship Management) com design retro pixelado, des
    VITE_SUPABASE_ANON_KEY=sua-chave-anon
    ```
    
-   **Como obter as credenciais:**
-   - Acesse [Supabase](https://app.supabase.com)
-   - Crie um novo projeto ou use um existente
-   - Vá em Settings > API
-   - Copie a URL do projeto e a chave `anon` public
+   **Como obter as credenciais (Passo a Passo):**
+   
+   1. **Acesse o Supabase**
+      - Vá para [https://app.supabase.com](https://app.supabase.com)
+      - Faça login ou crie uma conta gratuita
+   
+   2. **Crie ou selecione um projeto**
+      - Se não tiver um projeto, clique em "New Project"
+      - Preencha o nome do projeto, senha do banco de dados e escolha uma região
+      - Aguarde alguns minutos enquanto o projeto é criado
+      - Se já tiver um projeto, selecione-o na lista
+   
+   3. **Acesse as configurações da API**
+      - No menu lateral esquerdo, clique em **"Settings"** (ícone de engrenagem)
+      - Depois clique em **"API"** no submenu
+   
+   4. **Copie as credenciais**
+      - **Project URL**: Encontre a seção "Project URL" e copie a URL completa
+        - Exemplo: `https://abcdefghijklmnop.supabase.co`
+      - **anon public key**: Na seção "Project API keys", encontre a chave chamada **"anon"** ou **"public"**
+        - Clique no ícone de "eye" (olho) para revelar a chave
+        - Clique no ícone de cópia ao lado da chave para copiar
+        - Exemplo: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` (chave muito longa)
+   
+   5. **Cole no arquivo .env**
+      ```env
+      VITE_SUPABASE_URL=https://seu-projeto-id.supabase.co
+      VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+      ```
+   
+   **⚠️ Importante:**
+   - Nunca compartilhe sua chave `anon` publicamente (ela já está exposta no frontend, mas é segura devido ao RLS)
+   - Use a chave `anon` ou `public`, NÃO use a chave `service_role` (ela tem acesso total e é perigosa no frontend)
+   - A URL sempre termina com `.supabase.co`
 
 4. **Configure o banco de dados**
    
@@ -145,12 +174,19 @@ O projeto utiliza as seguintes tabelas no Supabase:
 
 ### Erro "Failed to fetch" no deploy
 
-Este erro geralmente ocorre quando as variáveis de ambiente não estão configuradas na plataforma de hospedagem:
+Este erro geralmente ocorre quando as variáveis de ambiente não estão configuradas na plataforma de hospedagem.
 
-**Para Vercel:**
-1. Vá em Settings > Environment Variables
-2. Adicione `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`
-3. Faça um novo deploy
+**📘 Guia Completo de Deploy:**
+- Veja o arquivo `DEPLOY_VERCEL.md` para instruções detalhadas de deploy na Vercel
+- Veja o arquivo `GUIA_SUPABASE.md` para obter as credenciais do Supabase
+
+**Resumo rápido para Vercel:**
+1. No dashboard da Vercel, vá em **Settings** > **Environment Variables**
+2. Adicione:
+   - `VITE_SUPABASE_URL` = sua URL do Supabase
+   - `VITE_SUPABASE_ANON_KEY` = sua chave anon
+3. Selecione todas as opções (Production, Preview, Development)
+4. **IMPORTANTE**: Após adicionar, vá em **Deployments** e faça um **Redeploy**
 
 **Para Netlify:**
 1. Vá em Site settings > Environment variables

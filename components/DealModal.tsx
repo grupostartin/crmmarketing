@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, FileText, Save, DollarSign, User, Layout } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useAgency } from '../context/AgencyContext';
 
 interface Contact {
     id: string;
@@ -14,6 +15,7 @@ interface DealModalProps {
 }
 
 const DealModal: React.FC<DealModalProps> = ({ isOpen, onClose, onSuccess }) => {
+    const { agency } = useAgency();
     const [loading, setLoading] = useState(false);
     const [contacts, setContacts] = useState<Contact[]>([]);
     const [formData, setFormData] = useState({
@@ -45,12 +47,17 @@ const DealModal: React.FC<DealModalProps> = ({ isOpen, onClose, onSuccess }) => 
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error('Usuário não autenticado');
 
+            if (!agency) {
+                throw new Error('Você precisa estar associado a uma agência para adicionar negócios');
+            }
+
             const { error } = await supabase
                 .from('deals')
                 .insert([
                     {
                         ...formData,
                         user_id: user.id,
+                        agency_id: agency.id,
                         created_at: new Date().toISOString()
                     }
                 ]);

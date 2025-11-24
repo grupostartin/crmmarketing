@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import PixelCard from '../components/ui/PixelCard';
 import PixelButton from '../components/ui/PixelButton';
 import QuizResponses from '../components/QuizResponses';
 import { Plus, Trash2, GripVertical, Eye, Share2, Save, Link as LinkIcon, Users } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useAgency } from '../context/AgencyContext';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -67,6 +68,7 @@ const SortableQuestionItem = ({ question, isActive, onClick }: SortableQuestionI
 const QuizBuilder = () => {
     const navigate = useNavigate();
     const { id: quizId } = useParams();
+    const { agency } = useAgency();
     const [quiz, setQuiz] = useState<Quiz | null>(null);
     const [questions, setQuestions] = useState<Question[]>([]);
     const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
@@ -74,6 +76,8 @@ const QuizBuilder = () => {
     const [saving, setSaving] = useState(false);
     const [showResponses, setShowResponses] = useState(false);
     const [deleteConfirm, setDeleteConfirm] = useState(false);
+    const isCreatingRef = useRef(false);
+    const isSavingRef = useRef(false);
 
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -94,33 +98,48 @@ const QuizBuilder = () => {
 
             if (quizId) {
                 // Carregar quiz existente
+                // RLS já filtra por agency_id automaticamente
                 const { data, error } = await supabase
                     .from('quizzes')
                     .select('*')
                     .eq('id', quizId)
-                    .eq('user_id', user.id)
                     .single();
 
                 if (error) throw error;
                 quizData = data;
             } else {
-                // Criar novo quiz
-                const { data: newQuiz, error: createError } = await supabase
-                    .from('quizzes')
-                    .insert([{
-                        user_id: user.id,
-                        title: 'Meu Novo Quiz',
-                        description: '',
-                        is_published: false
-                    }])
-                    .select()
-                    .single();
+                // Criar novo quiz apenas se ainda não estiver criando e não houver quiz já carregado
+                if (isCreatingRef.current || quiz) {
+                    return; // Já está criando ou já existe um quiz, evitar duplicação
+                }
 
-                if (createError) throw createError;
-                quizData = newQuiz;
+                if (!agency) {
+                    throw new Error('Você precisa estar associado a uma agência para criar quizzes');
+                }
 
-                // Redirecionar para a URL com o ID do novo quiz
-                navigate(`/quiz/builder/${newQuiz.id}`, { replace: true });
+                isCreatingRef.current = true;
+
+                try {
+                    const { data: newQuiz, error: createError } = await supabase
+                        .from('quizzes')
+                        .insert([{
+                            user_id: user.id,
+                            agency_id: agency.id,
+                            title: 'Meu Novo Quiz',
+                            description: '',
+                            is_published: false
+                        }])
+                        .select()
+                        .single();
+
+                    if (createError) throw createError;
+                    quizData = newQuiz;
+
+                    // Redirecionar para a URL com o ID do novo quiz
+                    navigate(`/quiz/builder/${newQuiz.id}`, { replace: true });
+                } finally {
+                    isCreatingRef.current = false;
+                }
             }
 
             setQuiz(quizData);
@@ -290,13 +309,21 @@ const QuizBuilder = () => {
 
     const handleSaveQuiz = async () => {
         if (!quiz) return;
+        
+        // Evitar múltiplas execuções
+        if (isSavingRef.current || saving) return;
+        
+        isSavingRef.current = true;
         setSaving(true);
+        
         try {
-            await supabase.from('quizzes').update({
+            const { error } = await supabase.from('quizzes').update({
                 title: quiz.title,
                 description: quiz.description,
                 is_published: true  // Auto-publicar
             }).eq('id', quiz.id);
+
+            if (error) throw error;
 
             // Redirecionar para lista de quizzes
             navigate('/quiz');
@@ -304,6 +331,7 @@ const QuizBuilder = () => {
             console.error(error);
             alert('Erro ao salvar quiz.');
             setSaving(false);
+            isSavingRef.current = false;
         }
     };
 

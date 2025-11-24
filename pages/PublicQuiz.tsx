@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { useTheme } from '../context/ThemeContext';
 import PixelButton from '../components/ui/PixelButton';
 import PixelCard from '../components/ui/PixelCard';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -29,8 +28,8 @@ interface Option {
 
 const PublicQuiz = () => {
     const { id } = useParams<{ id: string }>();
-    const { agencyName } = useTheme();
     const [quiz, setQuiz] = useState<Quiz | null>(null);
+    const [agencyName, setAgencyName] = useState<string>('AgencyFlow');
     const [questions, setQuestions] = useState<Question[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentStep, setCurrentStep] = useState(0); // 0 = dados, 1-N = perguntas
@@ -57,6 +56,18 @@ const PublicQuiz = () => {
             }
 
             setQuiz(quizData);
+            
+            // Buscar nome da agência
+            if (quizData.agency_id) {
+                const { data: agencyData } = await supabase
+                    .from('agencies')
+                    .select('name')
+                    .eq('id', quizData.agency_id)
+                    .single();
+                if (agencyData) {
+                    setAgencyName(agencyData.name);
+                }
+            }
 
             const { data: questionsData } = await supabase
                 .from('quiz_questions')
@@ -129,6 +140,17 @@ const PublicQuiz = () => {
             if (totalScore >= 61) leadStatus = 'Quente';
             else if (totalScore >= 31) leadStatus = 'Morno';
 
+            // Buscar agency_id do quiz
+            const { data: quizData } = await supabase
+                .from('quizzes')
+                .select('agency_id')
+                .eq('id', quiz.id)
+                .single();
+
+            if (!quizData?.agency_id) {
+                throw new Error('Quiz não está associado a uma agência');
+            }
+
             // 1. Criar contato
             const { data: contact, error: contactError } = await supabase
                 .from('contacts')
@@ -138,6 +160,7 @@ const PublicQuiz = () => {
                     phone: respondent.whatsapp,
                     status: leadStatus,
                     score: totalScore,
+                    agency_id: quizData.agency_id,
                     created_at: new Date().toISOString()
                 }])
                 .select()
@@ -152,6 +175,7 @@ const PublicQuiz = () => {
                     title: `${respondent.name} - Quiz: ${quiz.title}`,
                     contact_id: contact.id,
                     user_id: quiz.user_id,
+                    agency_id: quizData.agency_id,
                     value: 0,
                     stage: 'Novos Leads',
                     created_at: new Date().toISOString()
@@ -165,6 +189,7 @@ const PublicQuiz = () => {
                 .insert([{
                     quiz_id: quiz.id,
                     contact_id: contact.id,
+                    agency_id: quizData.agency_id,
                     respondent_name: respondent.name,
                     respondent_email: respondent.email,
                     respondent_whatsapp: respondent.whatsapp,

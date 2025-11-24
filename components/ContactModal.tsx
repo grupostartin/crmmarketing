@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, User, Mail, Phone, Save } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useAgency } from '../context/AgencyContext';
 
 interface ContactModalProps {
     isOpen: boolean;
@@ -9,6 +10,7 @@ interface ContactModalProps {
 }
 
 const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, onSuccess }) => {
+    const { agency } = useAgency();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -29,12 +31,17 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, onSuccess 
 
             if (!user) throw new Error('Usuário não autenticado');
 
+            if (!agency) {
+                throw new Error('Você precisa estar associado a uma agência para adicionar contatos');
+            }
+
             const { error } = await supabase
                 .from('contacts')
                 .insert([
                     {
                         ...formData,
                         user_id: user.id,
+                        agency_id: agency.id,
                         created_at: new Date().toISOString()
                     }
                 ]);

@@ -1,12 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { supabase } from '../lib/supabase';
-import { Moon, Sun, Type, Image as ImageIcon, Save, Loader } from 'lucide-react';
+import { Moon, Sun, Image as ImageIcon, Save, Loader, User, Copy, Check } from 'lucide-react';
 
 const Settings = () => {
-    const { themeMode, setThemeMode, themeStyle, setThemeStyle, profileImage, setProfileImage, agencyName, setAgencyName, saveSettings } = useTheme();
+    const { themeMode, setThemeMode, themeStyle, setThemeStyle, profileImage, setProfileImage, saveSettings } = useTheme();
     const [uploading, setUploading] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
+    const [userId, setUserId] = useState<string | null>(null);
+    const [copied, setCopied] = useState(false);
+
+    useEffect(() => {
+        const fetchUserId = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                setUserId(user.id);
+            }
+        };
+        fetchUserId();
+    }, []);
 
     const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         try {
@@ -51,6 +63,19 @@ const Settings = () => {
             alert('Erro ao salvar configurações.');
         } finally {
             setUploading(false);
+        }
+    };
+
+    const handleCopyUserId = async () => {
+        if (userId) {
+            try {
+                await navigator.clipboard.writeText(userId);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+            } catch (error) {
+                console.error('Error copying to clipboard:', error);
+                alert('Erro ao copiar User ID');
+            }
         }
     };
 
@@ -124,26 +149,35 @@ const Settings = () => {
                     </div>
                 </div>
 
-                {/* Agency Name */}
+                {/* User ID */}
                 <div className="bg-retro-surface border-4 border-black p-8 shadow-pixel">
                     <h2 className="font-header text-xl text-retro-fg mb-6 flex items-center gap-3">
-                        <Type size={24} className="text-retro-cyan" />
-                        Nome da Agência
+                        <User size={24} className="text-retro-purple" />
+                        Meu User ID
                     </h2>
                     <div className="space-y-4">
                         <div>
                             <label className="block text-retro-comment text-sm font-bold mb-2 uppercase">
-                                Nome da sua agência
+                                ID do Usuário
                             </label>
-                            <input
-                                type="text"
-                                value={agencyName}
-                                onChange={(e) => setAgencyName(e.target.value)}
-                                placeholder="AgencyFlow"
-                                className="w-full bg-retro-bg border-2 border-black p-3 text-retro-fg focus:border-retro-cyan outline-none"
-                            />
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={userId || 'Carregando...'}
+                                    readOnly
+                                    className="flex-1 bg-retro-bg border-2 border-black p-3 text-retro-fg font-mono text-sm"
+                                />
+                                <button
+                                    onClick={handleCopyUserId}
+                                    className="bg-retro-cyan hover:bg-retro-cyan/90 text-black font-header text-sm py-2 px-4 border-b-4 border-r-4 border-black active:border-0 active:translate-y-1 active:ml-1 transition-all uppercase flex items-center gap-2"
+                                    title="Copiar User ID"
+                                >
+                                    {copied ? <Check size={16} /> : <Copy size={16} />}
+                                    {copied ? 'Copiado!' : 'Copiar'}
+                                </button>
+                            </div>
                             <p className="text-retro-comment text-xs mt-2">
-                                Este nome aparecerá nas mensagens de agradecimento dos quizzes.
+                                Compartilhe este ID com o dono da agência para ser adicionado como membro.
                             </p>
                         </div>
                     </div>

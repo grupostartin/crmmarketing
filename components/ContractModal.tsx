@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, FileText, Save, DollarSign, Calendar, User } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useAgency } from '../context/AgencyContext';
 
 interface Contact {
     id: string;
@@ -15,6 +16,7 @@ interface ContractModalProps {
 }
 
 const ContractModal: React.FC<ContractModalProps> = ({ isOpen, onClose, onSuccess, contractId }) => {
+    const { agency } = useAgency();
     const [loading, setLoading] = useState(false);
     const [contacts, setContacts] = useState<Contact[]>([]);
     const [formData, setFormData] = useState({
@@ -106,12 +108,17 @@ const ContractModal: React.FC<ContractModalProps> = ({ isOpen, onClose, onSucces
                 if (error) throw error;
             } else {
                 // Criar novo contrato
+                if (!agency) {
+                    throw new Error('Você precisa estar associado a uma agência para adicionar contratos');
+                }
+
                 const { error } = await supabase
                     .from('contracts')
                     .insert([
                         {
                             ...formData,
                             user_id: user.id,
+                            agency_id: agency.id,
                             created_at: new Date().toISOString()
                         }
                     ]);

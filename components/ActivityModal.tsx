@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import PixelButton from './ui/PixelButton';
+import { useAgency } from '../context/AgencyContext';
 
 interface ActivityModalProps {
     isOpen: boolean;
@@ -11,6 +12,7 @@ interface ActivityModalProps {
 }
 
 const ActivityModal: React.FC<ActivityModalProps> = ({ isOpen, onClose, contactId, onSuccess }) => {
+    const { agency } = useAgency();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         type: 'Call',
@@ -29,12 +31,17 @@ const ActivityModal: React.FC<ActivityModalProps> = ({ isOpen, onClose, contactI
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error('Usuário não autenticado');
 
+            if (!agency) {
+                throw new Error('Você precisa estar associado a uma agência para registrar atividades');
+            }
+
             const { error } = await supabase
                 .from('activities')
                 .insert([
                     {
                         contact_id: contactId,
                         user_id: user.id,
+                        agency_id: agency.id,
                         type: formData.type,
                         title: formData.title,
                         description: formData.description || null,
