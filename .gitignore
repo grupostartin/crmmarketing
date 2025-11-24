@@ -28,3 +28,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Documentation and SQL scripts
+*.sql
+*.md
+!README.md

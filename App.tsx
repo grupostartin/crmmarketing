@@ -17,7 +17,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import EnvWarning from './components/EnvWarning';
 import { supabase } from './lib/supabase';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
-import { AgencyProvider } from './context/AgencyContext';
+import { AgencyProvider, useAgency } from './context/AgencyContext';
 
 import Plans from './pages/Plans';
 
@@ -38,6 +38,7 @@ const SidebarItem = ({ to, icon: Icon, label, active }: { to: string; icon: any;
 
 const Sidebar = () => {
   const location = useLocation();
+  const { currentUserRole } = useAgency();
 
   return (
     <aside className="w-64 bg-retro-bg border-r-4 border-black flex flex-col h-screen fixed left-0 top-0 z-20">
@@ -58,7 +59,9 @@ const Sidebar = () => {
         <SidebarItem to="/contracts" icon={FileText} label="Contratos" active={location.pathname === '/contracts'} />
         <SidebarItem to="/contacts" icon={Users} label="Contatos" active={location.pathname === '/contacts'} />
         <SidebarItem to="/agency" icon={Building2} label="Agência" active={location.pathname === '/agency'} />
-        <SidebarItem to="/plans" icon={Zap} label="Planos" active={location.pathname === '/plans'} />
+        {currentUserRole === 'owner' && (
+          <SidebarItem to="/plans" icon={Zap} label="Planos" active={location.pathname === '/plans'} />
+        )}
       </nav>
 
       <div className="p-4 border-t-4 border-black mt-auto">

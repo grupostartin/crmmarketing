@@ -5,7 +5,34 @@ import { useAgency } from '../context/AgencyContext';
 
 const Plans = () => {
     const [loading, setLoading] = useState(false);
-    const { agency, currentUserRole } = useAgency();
+    const { agency, currentUserRole, refresh, loading: agencyLoading } = useAgency();
+
+    // Forçar atualização dos dados ao entrar na tela para garantir status atualizado
+    React.useEffect(() => {
+        refresh();
+    }, []);
+
+    if (agencyLoading) {
+        return (
+            <div className="flex items-center justify-center h-full py-20">
+                <div className="font-header text-xl text-retro-fg animate-pulse">Carregando...</div>
+            </div>
+        );
+    }
+
+    if (currentUserRole !== 'owner') {
+        return (
+            <div className="max-w-5xl mx-auto py-20 px-4 text-center">
+                <div className="inline-flex items-center justify-center w-20 h-20 mb-6 rounded-full bg-retro-surface border-4 border-black">
+                    <Zap size={40} className="text-retro-comment" />
+                </div>
+                <h1 className="font-header text-4xl text-retro-fg mb-4">Acesso Restrito</h1>
+                <p className="font-body text-xl text-retro-comment max-w-lg mx-auto">
+                    Apenas o dono da agência pode visualizar e gerenciar os planos de assinatura.
+                </p>
+            </div>
+        );
+    }
 
     const handleSubscribe = async () => {
         if (currentUserRole !== 'owner') {
@@ -44,7 +71,7 @@ const Plans = () => {
         }
     };
 
-    const isProActive = agency?.subscription_tier === 'pro' && agency?.subscription_status === 'active';
+    const isProActive = agency?.subscription_tier?.toLowerCase() === 'pro' && agency?.subscription_status === 'active';
 
     const PlanCard = ({ 
         title, 
@@ -69,7 +96,7 @@ const Plans = () => {
             isPro ? 'bg-retro-surface' : 'bg-retro-bg'
         } ${current ? 'ring-4 ring-retro-green ring-offset-4 ring-offset-retro-bg' : ''}`}>
             {isPro && (
-                <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-retro-cyan border-4 border-black px-4 py-1 shadow-pixel-sm z-10">
+                <div className="absolute -top-5 left-4 bg-retro-cyan border-4 border-black px-4 py-1 shadow-pixel-sm z-10">
                     <span className="font-header text-black text-sm tracking-wider">ILIMITADO</span>
                 </div>
             )}

@@ -86,9 +86,11 @@ export const AgencyProvider = ({ children }: { children: ReactNode }) => {
       // Buscar dados da agência
       const { data: ag, error: agError } = await supabase
         .from('agencies')
-        .select('id, name')
+        .select('id, name, subscription_tier, subscription_status')
         .eq('id', au.agency_id)
         .maybeSingle();
+
+      console.log('DEBUG AGENCY CONTEXT - Fetched Agency:', ag);
 
       if (agError) {
         // PGRST116 = nenhum resultado encontrado
@@ -159,9 +161,9 @@ export const AgencyProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     loadData();
 
-    // Escutar mudanças na tabela agency_users
+    // Escutar mudanças na tabela agency_users e agencies
     if (supabase) {
-      const channel = supabase
+      const channelUsers = supabase
         .channel('agency_users_changes')
         .on(
           'postgres_changes',
@@ -176,11 +178,28 @@ export const AgencyProvider = ({ children }: { children: ReactNode }) => {
         )
         .subscribe();
 
+      const channelAgencies = supabase
+        .channel('agencies_changes')
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'agencies',
+            filter: agency ? `id=eq.${agency.id}` : undefined,
+          },
+          () => {
+            loadData();
+          }
+        )
+        .subscribe();
+
       return () => {
-        supabase.removeChannel(channel);
+        supabase.removeChannel(channelUsers);
+        supabase.removeChannel(channelAgencies);
       };
     }
-  }, []);
+  }, [agency?.id]); // Add dependency on agency.id to update filter
 
   const addMember = async (authUserId: string, role: Role) => {
     if (!agency) throw new Error('No agency found');
